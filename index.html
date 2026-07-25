@@ -3,10 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard Monitoring Daya</title>
-  <!-- Firebase SDK (CDN) -->
+  <title>Dashboard Monitoring Daya + ATS</title>
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <!-- SheetJS untuk export Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -26,18 +28,41 @@
       max-width: 1200px;
       width: 100%;
     }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+    }
     h1 {
       color: #f8fafc;
-      text-align: center;
-      margin-bottom: 30px;
       font-weight: 300;
       letter-spacing: 2px;
       text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      margin: 0;
+    }
+    .btn-export {
+      background: #10b981;
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 40px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+    .btn-export:hover {
+      transform: scale(1.05);
+      background: #059669;
     }
     .dashboard {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 25px;
+      margin-bottom: 30px;
     }
     .card {
       background: rgba(255,255,255,0.05);
@@ -86,10 +111,11 @@
     .card-pln-tegangan .value { color: #3b82f6; }
     .card-inv-arus .value { color: #10b981; }
     .card-inv-tegangan .value { color: #8b5cf6; }
+    .card-ats-delay .value { color: #f472b6; }
 
     .timestamp {
       text-align: center;
-      margin-top: 30px;
+      margin-top: 20px;
       color: #64748b;
       font-size: 0.9rem;
       letter-spacing: 1px;
@@ -100,80 +126,105 @@
     }
     @media (max-width: 600px) {
       .card .value { font-size: 2.2rem; }
+      .header { flex-direction: column; align-items: stretch; gap: 15px; }
+      .btn-export { width: 100%; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>⚡ MONITORING SISTEM DAYA</h1>
-    <div class="dashboard">
-      <div class="card card-pln-arus">
-        <h3>Arus PLN</h3>
-        <div class="value" id="pln-arus">--</div>
-        <div class="unit">A</div>
-        <div class="status" id="pln-arus-status">Menunggu data...</div>
-      </div>
-      <div class="card card-pln-tegangan">
-        <h3>Tegangan PLN</h3>
-        <div class="value" id="pln-tegangan">--</div>
-        <div class="unit">V</div>
-        <div class="status" id="pln-tegangan-status">Menunggu data...</div>
-      </div>
-      <div class="card card-inv-arus">
-        <h3>Arus Inverter</h3>
-        <div class="value" id="inv-arus">--</div>
-        <div class="unit">A</div>
-        <div class="status" id="inv-arus-status">Menunggu data...</div>
-      </div>
-      <div class="card card-inv-tegangan">
-        <h3>Tegangan Inverter</h3>
-        <div class="value" id="inv-tegangan">--</div>
-        <div class="unit">V</div>
-        <div class="status" id="inv-tegangan-status">Menunggu data...</div>
-      </div>
+<div class="container">
+  <div class="header">
+    <h1>⚡ MONITORING SISTEM DAYA + ATS</h1>
+    <button class="btn-export" id="exportBtn">📊 Export ke Excel</button>
+  </div>
+
+  <div class="dashboard">
+    <!-- Arus PLN -->
+    <div class="card card-pln-arus">
+      <h3>Arus PLN</h3>
+      <div class="value" id="pln-arus">--</div>
+      <div class="unit">A</div>
+      <div class="status" id="pln-arus-status">Menunggu data...</div>
     </div>
-    <div class="timestamp">
-      Terakhir diperbarui: <span id="last-update">--</span>
+    <!-- Tegangan PLN -->
+    <div class="card card-pln-tegangan">
+      <h3>Tegangan PLN</h3>
+      <div class="value" id="pln-tegangan">--</div>
+      <div class="unit">V</div>
+      <div class="status" id="pln-tegangan-status">Menunggu data...</div>
+    </div>
+    <!-- Arus Inverter -->
+    <div class="card card-inv-arus">
+      <h3>Arus Inverter</h3>
+      <div class="value" id="inv-arus">--</div>
+      <div class="unit">A</div>
+      <div class="status" id="inv-arus-status">Menunggu data...</div>
+    </div>
+    <!-- Tegangan Inverter -->
+    <div class="card card-inv-tegangan">
+      <h3>Tegangan Inverter</h3>
+      <div class="value" id="inv-tegangan">--</div>
+      <div class="unit">V</div>
+      <div class="status" id="inv-tegangan-status">Menunggu data...</div>
+    </div>
+    <!-- Time Delay ATS (baru) -->
+    <div class="card card-ats-delay">
+      <h3>⏱️ Time Delay ATS</h3>
+      <div class="value" id="ats-delay">--</div>
+      <div class="unit">detik</div>
+      <div class="status" id="ats-delay-status">Menunggu data...</div>
     </div>
   </div>
 
-  <script>
-    // =======================================================
-    //  KONFIGURASI FIREBASE – GANTI DENGAN DATA PROYEK ANDA
-    // =======================================================
-    const firebaseConfig = {
-      apiKey: "AIzaSyDPRKXi4tveI8prBSSaGJBv8snvoMLQvdU",               // ganti dengan API Key Anda
-      authDomain: "monitoring-sistem-ats.firebaseapp.com",
-      databaseURL: "https://monitoring-sistem-ats-default-rtdb.asia-southeast1.firebasedatabase.app/",
-      projectId: "monitoring-sistem-ats",
-      storageBucket: "monitoring-sistem-ats.firebasestorage.app",
-      messagingSenderId: "302971693017",
-      appId: "1:302971693017:web:82f55c71601dfb7c291bc8"
-    };
+  <div class="timestamp">
+    Terakhir diperbarui: <span id="last-update">--</span>
+  </div>
+</div>
 
-    // Inisialisasi Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
-    const sensorsRef = database.ref('/sensors');
+<script>
+  // ========== KONFIGURASI FIREBASE ==========
+  const firebaseConfig = {
+    apiKey: "AIzaSyDPRKXi4tveI8prBSSaGJBv8snvoMLQvdU",
+    authDomain: "monitoring-sistem-ats.firebaseapp.com",
+    databaseURL: "https://monitoring-sistem-ats-default-rtdb.asia-southeast1.firebasedatabase.app/",
+    projectId: "monitoring-sistem-ats",
+    storageBucket: "monitoring-sistem-ats.firebasestorage.app",
+    messagingSenderId: "302971693017",
+    appId: "1:302971693017:web:82f55c71601dfb7c291bc8"
+  };
 
-    // Elemen DOM
-    const elArusPLN = document.getElementById('pln-arus');
-    const elTegPLN = document.getElementById('pln-tegangan');
-    const elArusINV = document.getElementById('inv-arus');
-    const elTegINV = document.getElementById('inv-tegangan');
-    const elStatusArusPLN = document.getElementById('pln-arus-status');
-    const elStatusTegPLN = document.getElementById('pln-tegangan-status');
-    const elStatusArusINV = document.getElementById('inv-arus-status');
-    const elStatusTegINV = document.getElementById('inv-tegangan-status');
-    const elLastUpdate = document.getElementById('last-update');
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
 
-    // Fungsi update tampilan
-    function updateDashboard(data) {
-      if (!data) return;
-      const arusPLN = data.pln_arus !== undefined ? data.pln_arus.toFixed(2) : '--';
-      const tegPLN = data.pln_tegangan !== undefined ? data.pln_tegangan.toFixed(1) : '--';
-      const arusINV = data.inverter_arus !== undefined ? data.inverter_arus.toFixed(2) : '--';
-      const tegINV = data.inverter_tegangan !== undefined ? data.inverter_tegangan.toFixed(1) : '--';
+  // Referensi
+  const sensorsRef = database.ref('/sensors');
+  const atsRef = database.ref('/ats'); // node untuk data ATS (delay, last_switch, dsb)
+
+  // Elemen DOM
+  const elArusPLN = document.getElementById('pln-arus');
+  const elTegPLN = document.getElementById('pln-tegangan');
+  const elArusINV = document.getElementById('inv-arus');
+  const elTegINV = document.getElementById('inv-tegangan');
+  const elDelayATS = document.getElementById('ats-delay');
+  const elStatusArusPLN = document.getElementById('pln-arus-status');
+  const elStatusTegPLN = document.getElementById('pln-tegangan-status');
+  const elStatusArusINV = document.getElementById('inv-arus-status');
+  const elStatusTegINV = document.getElementById('inv-tegangan-status');
+  const elStatusDelay = document.getElementById('ats-delay-status');
+  const elLastUpdate = document.getElementById('last-update');
+
+  // Data terakhir untuk export
+  let lastSensorData = null;
+  let lastAtsData = null;
+
+  // Fungsi update tampilan
+  function updateDashboard(sensorData, atsData) {
+    // Update sensor
+    if (sensorData) {
+      const arusPLN = sensorData.pln_arus !== undefined ? sensorData.pln_arus.toFixed(2) : '--';
+      const tegPLN = sensorData.pln_tegangan !== undefined ? sensorData.pln_tegangan.toFixed(1) : '--';
+      const arusINV = sensorData.inverter_arus !== undefined ? sensorData.inverter_arus.toFixed(2) : '--';
+      const tegINV = sensorData.inverter_tegangan !== undefined ? sensorData.inverter_tegangan.toFixed(1) : '--';
 
       elArusPLN.textContent = arusPLN;
       elTegPLN.textContent = tegPLN;
@@ -185,30 +236,95 @@
       elStatusArusINV.textContent = (arusINV !== '--') ? '● Normal' : 'Tidak ada data';
       elStatusTegINV.textContent = (tegINV !== '--') ? '● Normal' : 'Tidak ada data';
 
-      if (data.timestamp) {
-        const ts = new Date(data.timestamp);
-        elLastUpdate.textContent = ts.toLocaleString('id-ID');
-      } else {
-        elLastUpdate.textContent = new Date().toLocaleString('id-ID');
-      }
+      lastSensorData = sensorData;
     }
 
-    // Mendengarkan perubahan real‑time
-    sensorsRef.on('value', (snapshot) => {
-      const data = snapshot.val();
-      if (data) updateDashboard(data);
-      else {
-        document.querySelectorAll('.value').forEach(el => el.textContent = '--');
-        document.querySelectorAll('.status').forEach(el => el.textContent = 'Tidak ada data');
-        elLastUpdate.textContent = 'Belum ada data';
-      }
-    }, (error) => console.error('Gagal membaca data:', error));
+    // Update ATS
+    if (atsData) {
+      const delay = atsData.delay !== undefined ? atsData.delay.toFixed(1) : '--';
+      elDelayATS.textContent = delay;
+      elStatusDelay.textContent = (delay !== '--') ? '● Siap' : 'Tidak ada data';
+      lastAtsData = atsData;
+    }
 
-    // Ambil data awal sekali
-    sensorsRef.once('value').then((snapshot) => {
-      const data = snapshot.val();
-      if (data) updateDashboard(data);
-    });
-  </script>
+    // Timestamp dari sensor jika ada
+    if (sensorData && sensorData.timestamp) {
+      const ts = new Date(sensorData.timestamp);
+      elLastUpdate.textContent = ts.toLocaleString('id-ID');
+    } else {
+      elLastUpdate.textContent = new Date().toLocaleString('id-ID');
+    }
+  }
+
+  // Listener real-time untuk sensor
+  sensorsRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      // Gabungkan dengan data ATS terakhir yang sudah ada
+      updateDashboard(data, lastAtsData);
+    } else {
+      // Reset sensor jika data null
+      document.querySelectorAll('.card:not(.card-ats-delay) .value').forEach(el => el.textContent = '--');
+      document.querySelectorAll('.card:not(.card-ats-delay) .status').forEach(el => el.textContent = 'Tidak ada data');
+      lastSensorData = null;
+    }
+  }, (error) => console.error('Gagal membaca sensor:', error));
+
+  // Listener untuk ATS
+  atsRef.on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+      updateDashboard(lastSensorData, data);
+    } else {
+      elDelayATS.textContent = '--';
+      elStatusDelay.textContent = 'Tidak ada data';
+      lastAtsData = null;
+    }
+  }, (error) => console.error('Gagal membaca ATS:', error));
+
+  // Ambil data awal sekali
+  Promise.all([
+    sensorsRef.once('value'),
+    atsRef.once('value')
+  ]).then(([snapSensor, snapAts]) => {
+    updateDashboard(snapSensor.val(), snapAts.val());
+  });
+
+  // ========== EXPORT KE EXCEL ==========
+  document.getElementById('exportBtn').addEventListener('click', async function() {
+    try {
+      // Ambil data terbaru dari Firebase (sensor + ATS)
+      const [snapSensor, snapAts] = await Promise.all([
+        sensorsRef.once('value'),
+        atsRef.once('value')
+      ]);
+      const sensor = snapSensor.val() || {};
+      const ats = snapAts.val() || {};
+
+      // Buat data untuk Excel
+      const now = new Date().toLocaleString('id-ID');
+      const rows = [
+        ['Waktu Export', now],
+        ['Parameter', 'Nilai', 'Satuan'],
+        ['Arus PLN', sensor.pln_arus ?? '--', 'A'],
+        ['Tegangan PLN', sensor.pln_tegangan ?? '--', 'V'],
+        ['Arus Inverter', sensor.inverter_arus ?? '--', 'A'],
+        ['Tegangan Inverter', sensor.inverter_tegangan ?? '--', 'V'],
+        ['Time Delay ATS', ats.delay ?? '--', 'detik'],
+        ['Timestamp Sensor', sensor.timestamp ? new Date(sensor.timestamp).toLocaleString('id-ID') : '--', '']
+      ];
+
+      // Buat workbook
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      XLSX.utils.book_append_sheet(wb, ws, 'Monitoring');
+      // Buat file dan unduh
+      XLSX.writeFile(wb, `Monitoring_ATS_${new Date().toISOString().slice(0,10)}.xlsx`);
+    } catch (err) {
+      console.error('Gagal export:', err);
+      alert('Gagal mengunduh file Excel. Periksa koneksi atau data Firebase.');
+    }
+  });
+</script>
 </body>
 </html>
