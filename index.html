@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard Monitoring Daya + ATS</title>
+    <title>Dashboard Monitoring ATS</title>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
     </script>
@@ -13,167 +13,200 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
     </script>
     <style>
-        /* ===== RESET & BASE ===== */
+        /* ================================================================
+               RESET & BASE
+            ================================================================ */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
         }
 
         body {
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            background: #0a0e1a;
-            overflow-x: hidden;
+            padding: 24px;
+            color: #e2e8f0;
             position: relative;
+            background: #0b0f1a;
+            overflow-x: hidden;
         }
 
-        /* ===== ANIMATED BACKGROUND ===== */
-        .bg-layer {
+        /* ================================================================
+               BACKGROUND MODERN — GELOMBANG & GRADIENT HALUS
+            ================================================================ */
+        .bg-container {
             position: fixed;
             inset: 0;
             z-index: 0;
+            overflow: hidden;
             background:
-                radial-gradient(ellipse 80% 60% at 10% 20%, rgba(56, 89, 202, 0.25) 0%, transparent 70%),
-                radial-gradient(ellipse 70% 50% at 90% 80%, rgba(139, 92, 246, 0.20) 0%, transparent 70%),
-                radial-gradient(ellipse 50% 40% at 50% 50%, rgba(16, 185, 129, 0.08) 0%, transparent 60%),
-                #0a0e1a;
+                radial-gradient(ellipse 80% 60% at 10% 20%, rgba(56, 189, 248, 0.10) 0%, transparent 70%),
+                radial-gradient(ellipse 70% 50% at 90% 80%, rgba(20, 184, 166, 0.08) 0%, transparent 60%),
+                linear-gradient(145deg, #0b0f1a 0%, #141b2b 50%, #0f1729 100%);
         }
 
-        .orb {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(80px);
+        /* Gelombang SVG animasi */
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 320'%3E%3Cpath d='M0,160 C300,280 600,40 900,160 C1050,220 1150,280 1200,280 L1200,320 L0,320 Z' fill='rgba(56,189,248,0.04)'/%3E%3C/svg%3E") repeat-x bottom;
+            background-size: 1200px 320px;
+            animation: waveMove 18s linear infinite;
+            opacity: 0.6;
             pointer-events: none;
-            z-index: 0;
-            animation: orbFloat 20s ease-in-out infinite alternate;
         }
-        .orb-1 {
-            width: 500px;
-            height: 500px;
-            background: rgba(56, 89, 202, 0.20);
-            top: -150px;
-            left: -150px;
-            animation-duration: 25s;
+        .wave:nth-child(2) {
+            bottom: -20px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 320'%3E%3Cpath d='M0,200 C200,100 500,280 800,180 C1000,120 1100,200 1200,200 L1200,320 L0,320 Z' fill='rgba(20,184,166,0.035)'/%3E%3C/svg%3E") repeat-x bottom;
+            background-size: 1200px 320px;
+            animation: waveMove 24s linear infinite reverse;
+            opacity: 0.4;
         }
-        .orb-2 {
-            width: 400px;
-            height: 400px;
-            background: rgba(139, 92, 246, 0.18);
-            bottom: -100px;
-            right: -100px;
-            animation-duration: 30s;
-            animation-delay: -5s;
+
+        @keyframes waveMove {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
         }
-        .orb-3 {
+
+        /* Bintik-bintik lembut (partikel) */
+        .particles {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.06);
+            animation: floatParticle 20s ease-in-out infinite alternate;
+            box-shadow: 0 0 20px rgba(56, 189, 248, 0.05);
+        }
+        .particle:nth-child(1) {
             width: 300px;
             height: 300px;
-            background: rgba(16, 185, 129, 0.10);
+            top: -80px;
+            left: -60px;
+            animation-duration: 28s;
+            background: radial-gradient(circle, rgba(56, 189, 248, 0.06), transparent 70%);
+        }
+        .particle:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            bottom: -120px;
+            right: -80px;
+            animation-duration: 32s;
+            animation-delay: -6s;
+            background: radial-gradient(circle, rgba(20, 184, 166, 0.05), transparent 70%);
+        }
+        .particle:nth-child(3) {
+            width: 200px;
+            height: 200px;
             top: 40%;
             left: 60%;
-            animation-duration: 22s;
+            animation-duration: 24s;
             animation-delay: -10s;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.04), transparent 70%);
+        }
+        .particle:nth-child(4) {
+            width: 150px;
+            height: 150px;
+            top: 70%;
+            left: 10%;
+            animation-duration: 30s;
+            animation-delay: -4s;
+            background: radial-gradient(circle, rgba(245, 158, 11, 0.04), transparent 70%);
         }
 
-        @keyframes orbFloat {
+        @keyframes floatParticle {
             0% {
                 transform: translate(0, 0) scale(1);
             }
-            33% {
-                transform: translate(60px, -40px) scale(1.1);
-            }
-            66% {
-                transform: translate(-30px, 50px) scale(0.9);
+            50% {
+                transform: translate(40px, -30px) scale(1.1);
             }
             100% {
-                transform: translate(40px, 20px) scale(1.05);
+                transform: translate(-20px, 40px) scale(0.9);
             }
         }
 
-        /* ===== GRID OVERLAY ===== */
-        .grid-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-            background-size: 60px 60px;
-            pointer-events: none;
-        }
-
-        /* ===== CONTAINER ===== */
+        /* ================================================================
+               CONTAINER UTAMA
+            ================================================================ */
         .container {
             position: relative;
             z-index: 1;
-            max-width: 1200px;
-            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
         }
 
-        /* ===== HEADER ===== */
-        .header {
+        /* ================================================================
+               HEADER / JUDUL — lebih transparan dengan efek glassmorphism
+            ================================================================ */
+        .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 18px;
-            margin-bottom: 32px;
-            padding: 16px 28px;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding: 14px 24px;
             background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
             border-radius: 20px;
             border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
         }
 
-        .logo-area {
+        .page-header .brand {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
         }
-
-        .logo-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 16px;
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        .page-header .brand .icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            font-size: 22px;
             color: #fff;
-            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.35);
-            flex-shrink: 0;
+            box-shadow: 0 4px 20px rgba(20, 184, 166, 0.30);
         }
-
-        .logo-text h1 {
-            color: #f1f5f9;
+        .page-header .brand h1 {
+            font-size: 1.3rem;
             font-weight: 600;
-            font-size: 1.5rem;
-            letter-spacing: 0.5px;
-            line-height: 1.2;
+            color: #f1f5f9;
+            letter-spacing: 0.3px;
         }
-        .logo-text h1 span {
+        .page-header .brand h1 span {
             font-weight: 300;
             color: #94a3b8;
         }
-        .logo-text .sub {
-            color: #64748b;
-            font-size: 0.75rem;
-            letter-spacing: 2px;
+        .page-header .brand .sub {
+            font-size: 0.7rem;
+            color: #94a3b8;
             text-transform: uppercase;
+            letter-spacing: 1.5px;
             margin-top: 2px;
+            opacity: 0.7;
         }
 
-        .header-right {
+        .header-actions {
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 14px;
             flex-wrap: wrap;
         }
 
@@ -181,23 +214,23 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(239, 68, 68, 0.15);
-            padding: 6px 16px 6px 12px;
-            border-radius: 40px;
-            border: 1px solid rgba(239, 68, 68, 0.25);
+            background: rgba(239, 68, 68, 0.10);
+            padding: 5px 16px 5px 12px;
+            border-radius: 30px;
+            border: 1px solid rgba(239, 68, 68, 0.15);
             color: #f87171;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             font-weight: 600;
-            letter-spacing: 0.5px;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
-        .live-dot {
-            width: 10px;
-            height: 10px;
+        .live-badge .dot {
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
             background: #ef4444;
             animation: pulseDot 1.4s ease-in-out infinite;
-            box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+            box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
         }
         @keyframes pulseDot {
             0%,
@@ -206,408 +239,690 @@
                 transform: scale(1);
             }
             50% {
-                opacity: 0.4;
+                opacity: 0.3;
                 transform: scale(0.7);
             }
         }
 
         .btn-export {
-            background: linear-gradient(135deg, #10b981, #059669);
+            background: linear-gradient(135deg, #14b8a6, #0d9488);
             border: none;
             color: #fff;
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-size: 0.9rem;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+            transition: 0.25s;
+            box-shadow: 0 4px 20px rgba(20, 184, 166, 0.25);
             display: flex;
             align-items: center;
             gap: 8px;
-            letter-spacing: 0.3px;
         }
         .btn-export:hover {
             transform: scale(1.04) translateY(-2px);
-            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.45);
+            box-shadow: 0 8px 32px rgba(20, 184, 166, 0.40);
         }
         .btn-export:active {
             transform: scale(0.96);
         }
-
-        /* ===== DASHBOARD GRID ===== */
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 24px;
+        .btn-export:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        /* ===== CARDS ===== */
-        .card {
+        /* ================================================================
+               BAGIAN DATA AKTUAL SENSOR
+            ================================================================ */
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #94a3b8;
+            margin-bottom: 16px;
+            padding-left: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-label .line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent);
+        }
+        .section-label .badge-time {
+            font-weight: 400;
+            color: #94a3b8;
+            font-size: 0.7rem;
+            text-transform: none;
+            letter-spacing: 0.3px;
+            background: rgba(255, 255, 255, 0.04);
+            padding: 2px 12px;
+            border-radius: 20px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+
+        .metric-card {
             background: rgba(255, 255, 255, 0.04);
             backdrop-filter: blur(14px);
             -webkit-backdrop-filter: blur(14px);
-            border-radius: 20px;
-            padding: 22px 18px 20px;
+            border-radius: 18px;
+            padding: 20px 16px 18px;
             border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-            transition: transform 0.25s ease, box-shadow 0.35s ease, border-color 0.3s;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.20);
+            transition: transform 0.25s, box-shadow 0.35s, border-color 0.3s;
             text-align: center;
-            color: #e2e8f0;
             position: relative;
             overflow: hidden;
         }
-        .card::before {
+        .metric-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             height: 3px;
-            border-radius: 20px 20px 0 0;
-            opacity: 0.8;
+            border-radius: 18px 18px 0 0;
+            opacity: 0.7;
             transition: height 0.3s;
         }
-        .card:hover {
+        .metric-card:hover {
             transform: translateY(-6px);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
-            border-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+            border-color: rgba(255, 255, 255, 0.10);
         }
-        .card:hover::before {
+        .metric-card:hover::before {
             height: 4px;
         }
 
-        .card-pln-arus::before {
+        .card-arus-pln::before {
             background: linear-gradient(90deg, #f59e0b, #fbbf24);
         }
-        .card-pln-tegangan::before {
+        .card-teg-pln::before {
             background: linear-gradient(90deg, #3b82f6, #60a5fa);
         }
-        .card-inv-arus::before {
-            background: linear-gradient(90deg, #10b981, #34d399);
+        .card-arus-inv::before {
+            background: linear-gradient(90deg, #14b8a6, #34d399);
         }
-        .card-inv-tegangan::before {
+        .card-teg-inv::before {
             background: linear-gradient(90deg, #8b5cf6, #a78bfa);
         }
         .card-ats-delay::before {
             background: linear-gradient(90deg, #f472b6, #f9a8d4);
         }
 
-        .card-icon {
-            font-size: 2rem;
-            margin-bottom: 8px;
+        .metric-card .card-icon {
+            font-size: 1.6rem;
             display: block;
+            margin-bottom: 6px;
             opacity: 0.8;
         }
-
-        .card h3 {
-            font-size: 0.8rem;
+        .metric-card .card-label {
+            font-size: 0.7rem;
             font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 1.2px;
+            letter-spacing: 0.8px;
             color: #94a3b8;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
-
-        .card .value-wrap {
+        .metric-card .value-wrap {
             display: flex;
             align-items: baseline;
             justify-content: center;
             gap: 4px;
-            margin-bottom: 6px;
         }
-        .card .value {
-            font-size: 2.6rem;
+        .metric-card .value {
+            font-size: 2.2rem;
             font-weight: 700;
-            transition: color 0.3s, transform 0.15s;
+            transition: transform 0.2s;
             line-height: 1.1;
         }
-        .card .value.update-pulse {
-            animation: valuePulse 0.35s ease;
+        .metric-card .value.pulse {
+            animation: valPulse 0.35s ease;
         }
-        @keyframes valuePulse {
+        @keyframes valPulse {
             0% {
                 transform: scale(1);
             }
             50% {
-                transform: scale(1.08);
+                transform: scale(1.06);
             }
             100% {
                 transform: scale(1);
             }
         }
-
-        .card .unit {
-            font-size: 1rem;
+        .metric-card .unit {
+            font-size: 0.85rem;
             font-weight: 300;
             color: #94a3b8;
-            margin-left: 2px;
         }
-
-        .card .status {
-            font-size: 0.75rem;
-            margin-top: 10px;
-            padding: 4px 16px;
-            border-radius: 30px;
+        .metric-card .status-badge {
             display: inline-block;
-            background: rgba(255, 255, 255, 0.06);
-            color: #94a3b8;
+            margin-top: 10px;
+            padding: 2px 14px;
+            border-radius: 30px;
+            font-size: 0.65rem;
             font-weight: 500;
             letter-spacing: 0.3px;
-            transition: background 0.3s, color 0.3s;
+            background: rgba(255, 255, 255, 0.06);
+            color: #94a3b8;
         }
-        .status.online {
-            background: rgba(16, 185, 129, 0.15);
+        .status-badge.online {
+            background: rgba(16, 185, 129, 0.14);
             color: #34d399;
         }
-        .status.warning {
-            background: rgba(245, 158, 11, 0.15);
-            color: #fbbf24;
-        }
-        .status.offline {
-            background: rgba(239, 68, 68, 0.12);
+        .status-badge.offline {
+            background: rgba(239, 68, 68, 0.10);
             color: #f87171;
         }
-        .status.ready {
+        .status-badge.ready {
             background: rgba(59, 130, 246, 0.12);
             color: #60a5fa;
         }
+        .status-badge.warning {
+            background: rgba(245, 158, 11, 0.12);
+            color: #fbbf24;
+        }
 
-        .card-pln-arus .value {
+        .card-arus-pln .value {
             color: #f59e0b;
         }
-        .card-pln-tegangan .value {
+        .card-teg-pln .value {
             color: #3b82f6;
         }
-        .card-inv-arus .value {
-            color: #10b981;
+        .card-arus-inv .value {
+            color: #14b8a6;
         }
-        .card-inv-tegangan .value {
+        .card-teg-inv .value {
             color: #8b5cf6;
         }
         .card-ats-delay .value {
             color: #f472b6;
         }
 
-        /* ===== TIMESTAMP ===== */
-        .timestamp {
+        /* ================================================================
+               BAGIAN STATUS / RINGKASAN SISTEM
+            ================================================================ */
+        .status-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 18px;
+            margin-bottom: 32px;
+        }
+
+        .status-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 18px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
             text-align: center;
-            color: #475569;
-            font-size: 0.85rem;
-            letter-spacing: 0.5px;
-            padding: 12px 0 4px;
+            transition: border-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+        }
+        .status-card:hover {
+            border-color: rgba(255, 255, 255, 0.10);
+            transform: translateY(-2px);
+        }
+        .status-card .label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            margin-bottom: 6px;
+        }
+        .status-card .status-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .status-card .status-value.ok {
+            color: #34d399;
+        }
+        .status-card .status-value.warn {
+            color: #fbbf24;
+        }
+        .status-card .status-value.err {
+            color: #f87171;
+        }
+        .status-card .status-value.info {
+            color: #60a5fa;
+        }
+
+        /* ================================================================
+               BAGIAN TABEL RIWAYAT LOG
+            ================================================================ */
+        .log-section {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 20px 20px 16px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .log-toolbar {
             display: flex;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .log-toolbar .left {
+            display: flex;
             align-items: center;
             gap: 16px;
             flex-wrap: wrap;
         }
-        .timestamp span {
+        .log-toolbar .left .nav-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #94a3b8;
+            padding: 4px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+        }
+        .log-toolbar .left .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+        }
+        .log-toolbar .left .date-label {
+            font-size: 0.8rem;
             color: #94a3b8;
             font-weight: 500;
         }
-        .timestamp .update-icon {
-            display: inline-block;
-            animation: spin 2s linear infinite;
-            opacity: 0.4;
-            font-size: 0.9rem;
+        .log-toolbar .right {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
         }
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
+        .log-toolbar .right .action-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            color: #94a3b8;
+            padding: 5px 16px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .log-toolbar .right .action-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+        }
+        .log-toolbar .right .action-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.12);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.15);
         }
 
-        /* ===== RESPONSIVE ===== */
+        /* Tabel */
+        .table-wrap {
+            overflow-x: auto;
+        }
+        table.log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            min-width: 700px;
+        }
+        table.log-table thead {
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        table.log-table th {
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-size: 0.6rem;
+            letter-spacing: 0.8px;
+            white-space: nowrap;
+        }
+        table.log-table th .sub {
+            font-weight: 400;
+            color: #64748b;
+            text-transform: none;
+            letter-spacing: 0.2px;
+            font-size: 0.55rem;
+            display: block;
+            margin-top: 2px;
+        }
+        table.log-table td {
+            padding: 9px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            color: #cbd5e1;
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+        table.log-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+        table.log-table .no-data {
+            text-align: center;
+            padding: 24px 0;
+            color: #475569;
+            font-style: italic;
+        }
+
+        /* ================================================================
+               FOOTER TIMESTAMP
+            ================================================================ */
+        .footer-ts {
+            text-align: center;
+            color: #475569;
+            font-size: 0.75rem;
+            letter-spacing: 0.3px;
+            padding: 8px 0 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+        .footer-ts span {
+            color: #94a3b8;
+        }
+
+        /* ================================================================
+               RESPONSIVE
+            ================================================================ */
         @media (max-width: 768px) {
-            .header {
+            body {
+                padding: 14px;
+            }
+            .page-header {
                 flex-direction: column;
                 align-items: stretch;
-                padding: 18px 20px;
+                padding: 14px 18px;
             }
-            .logo-area {
+            .page-header .brand {
                 justify-content: center;
             }
-            .logo-text h1 {
-                font-size: 1.2rem;
-            }
-            .header-right {
+            .header-actions {
                 justify-content: center;
             }
-            .dashboard {
-                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-                gap: 14px;
+            .cards-grid {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 12px;
             }
-            .card .value {
-                font-size: 2rem;
+            .metric-card .value {
+                font-size: 1.7rem;
             }
-            .card {
-                padding: 18px 12px 16px;
+            .status-summary {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                gap: 12px;
             }
-            .card-icon {
-                font-size: 1.6rem;
+            .log-toolbar {
+                flex-direction: column;
+                align-items: stretch;
             }
-            .btn-export {
-                padding: 8px 18px;
-                font-size: 0.8rem;
+            .log-toolbar .left,
+            .log-toolbar .right {
+                justify-content: center;
             }
-            .logo-icon {
-                width: 44px;
-                height: 44px;
-                font-size: 20px;
+            table.log-table {
+                font-size: 0.7rem;
+                min-width: 600px;
+            }
+            table.log-table th,
+            table.log-table td {
+                padding: 6px 8px;
             }
         }
 
         @media (max-width: 480px) {
-            .dashboard {
+            .cards-grid {
                 grid-template-columns: 1fr 1fr;
                 gap: 10px;
             }
-            .card .value {
-                font-size: 1.6rem;
+            .metric-card {
+                padding: 14px 10px 12px;
             }
-            .card h3 {
-                font-size: 0.65rem;
-                letter-spacing: 0.8px;
+            .metric-card .value {
+                font-size: 1.4rem;
             }
-            .card .status {
+            .metric-card .card-icon {
+                font-size: 1.2rem;
+            }
+            .metric-card .card-label {
                 font-size: 0.6rem;
-                padding: 2px 10px;
             }
-            .card-icon {
-                font-size: 1.3rem;
-                margin-bottom: 4px;
+            .status-summary {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
             }
-            .header {
-                padding: 14px 16px;
+            .status-card {
+                padding: 12px 10px;
             }
-            .logo-text h1 {
+            .status-card .status-value {
+                font-size: 0.95rem;
+            }
+            .log-section {
+                padding: 14px 10px 12px;
+            }
+            .page-header .brand h1 {
                 font-size: 1rem;
+            }
+            .btn-export {
+                padding: 6px 14px;
+                font-size: 0.7rem;
+            }
+            .live-badge {
+                font-size: 0.6rem;
+                padding: 4px 12px 4px 8px;
             }
         }
 
-        /* ===== SCROLLBAR ===== */
+        /* Scrollbar */
         ::-webkit-scrollbar {
-            width: 6px;
+            width: 5px;
+            height: 5px;
         }
         ::-webkit-scrollbar-track {
-            background: #0a0e1a;
+            background: #0b0f1a;
         }
         ::-webkit-scrollbar-thumb {
-            background: #334155;
+            background: #2d3748;
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
+            background: #4a5568;
         }
     </style>
 </head>
 <body>
 
-    <!-- ===== ANIMATED BACKGROUND ===== -->
-    <div class="bg-layer"></div>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
-    <div class="grid-overlay"></div>
+    <!-- ===== BACKGROUND MODERN ===== -->
+    <div class="bg-container">
+        <div class="wave"></div>
+        <div class="wave"></div>
+        <div class="particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+        </div>
+    </div>
 
     <!-- ===== MAIN CONTAINER ===== -->
     <div class="container">
 
         <!-- ===== HEADER ===== -->
-        <header class="header">
-            <div class="logo-area">
-                <div class="logo-icon">⚡</div>
-                <div class="logo-text">
+        <header class="page-header">
+            <div class="brand">
+                <div class="icon">⚡</div>
+                <div>
                     <h1>ATS <span>Monitoring</span></h1>
                     <div class="sub">Sistem Daya · Real-time</div>
                 </div>
             </div>
-            <div class="header-right">
+            <div class="header-actions">
                 <div class="live-badge">
-                    <span class="live-dot"></span>
-                    LIVE
+                    <span class="dot"></span> LIVE
                 </div>
-                <button class="btn-export" id="exportBtn">
-                    <span>📊</span> Export Excel
-                </button>
+                <button class="btn-export" id="exportBtn">📊 Export Excel</button>
             </div>
         </header>
 
-        <!-- ===== DASHBOARD ===== -->
-        <div class="dashboard">
+        <!-- ================================================================
+        DATA AKTUAL SENSOR (DETIK INI)
+        ================================================================ -->
+        <div class="section-label">
+            📡 DATA AKTUAL SENSOR
+            <span class="badge-time" id="lastUpdateLabel">—</span>
+            <span class="line"></span>
+        </div>
 
+        <div class="cards-grid">
             <!-- Arus PLN -->
-            <div class="card card-pln-arus" data-card="pln-arus">
-                <span class="card-icon">⚡</span>
-                <h3>Arus PLN</h3>
+            <div class="metric-card card-arus-pln">
+                <span class="card-icon">🔌</span>
+                <div class="card-label">Arus PLN</div>
                 <div class="value-wrap">
-                    <span class="value" id="pln-arus">--</span>
+                    <span class="value" id="plnArus">--</span>
                     <span class="unit">A</span>
                 </div>
-                <div class="status" id="pln-arus-status">Menunggu data...</div>
+                <span class="status-badge" id="plnArusStatus">Menunggu...</span>
             </div>
 
             <!-- Tegangan PLN -->
-            <div class="card card-pln-tegangan" data-card="pln-tegangan">
-                <span class="card-icon">🔌</span>
-                <h3>Tegangan PLN</h3>
+            <div class="metric-card card-teg-pln">
+                <span class="card-icon">⚡</span>
+                <div class="card-label">Tegangan PLN</div>
                 <div class="value-wrap">
-                    <span class="value" id="pln-tegangan">--</span>
+                    <span class="value" id="plnTeg">--</span>
                     <span class="unit">V</span>
                 </div>
-                <div class="status" id="pln-tegangan-status">Menunggu data...</div>
+                <span class="status-badge" id="plnTegStatus">Menunggu...</span>
             </div>
 
             <!-- Arus Inverter -->
-            <div class="card card-inv-arus" data-card="inv-arus">
+            <div class="metric-card card-arus-inv">
                 <span class="card-icon">☀️</span>
-                <h3>Arus Inverter</h3>
+                <div class="card-label">Arus Inverter</div>
                 <div class="value-wrap">
-                    <span class="value" id="inv-arus">--</span>
+                    <span class="value" id="invArus">--</span>
                     <span class="unit">A</span>
                 </div>
-                <div class="status" id="inv-arus-status">Menunggu data...</div>
+                <span class="status-badge" id="invArusStatus">Menunggu...</span>
             </div>
 
             <!-- Tegangan Inverter -->
-            <div class="card card-inv-tegangan" data-card="inv-tegangan">
+            <div class="metric-card card-teg-inv">
                 <span class="card-icon">🔋</span>
-                <h3>Tegangan Inverter</h3>
+                <div class="card-label">Tegangan Inverter</div>
                 <div class="value-wrap">
-                    <span class="value" id="inv-tegangan">--</span>
+                    <span class="value" id="invTeg">--</span>
                     <span class="unit">V</span>
                 </div>
-                <div class="status" id="inv-tegangan-status">Menunggu data...</div>
+                <span class="status-badge" id="invTegStatus">Menunggu...</span>
             </div>
 
             <!-- Time Delay ATS -->
-            <div class="card card-ats-delay" data-card="ats-delay">
+            <div class="metric-card card-ats-delay">
                 <span class="card-icon">⏱️</span>
-                <h3>Time Delay ATS</h3>
+                <div class="card-label">Time Delay ATS</div>
                 <div class="value-wrap">
-                    <span class="value" id="ats-delay">--</span>
+                    <span class="value" id="atsDelay">--</span>
                     <span class="unit">detik</span>
                 </div>
-                <div class="status" id="ats-delay-status">Menunggu data...</div>
+                <span class="status-badge" id="atsDelayStatus">Menunggu...</span>
             </div>
-
         </div>
 
-        <!-- ===== TIMESTAMP ===== -->
-        <div class="timestamp">
-            <span>🔄</span>
-            Terakhir diperbarui: <span id="last-update">--</span>
-            <span style="opacity:0.3; margin:0 4px;">|</span>
-            <span style="opacity:0.5; font-size:0.75rem;" id="data-source">sumber: Firebase Realtime</span>
+        <!-- ================================================================
+        STATUS SISTEM (Ringkasan)
+        ================================================================ -->
+        <div class="section-label">
+            📊 STATUS SISTEM
+            <span class="line"></span>
+        </div>
+
+        <div class="status-summary">
+            <div class="status-card">
+                <div class="label">Sumber Daya Aktif</div>
+                <div class="status-value info" id="sumberAktif">—</div>
+            </div>
+            <div class="status-card">
+                <div class="label">Status ATS</div>
+                <div class="status-value info" id="statusATS">—</div>
+            </div>
+        </div>
+
+        <!-- ================================================================
+        TABEL RIWAYAT LOG
+        ================================================================ -->
+        <div class="log-section">
+            <div class="log-toolbar">
+                <div class="left">
+                    <button class="nav-btn" id="prevDayBtn">◀ Sebelumnya</button>
+                    <span class="date-label" id="logDateLabel">Hari Ini</span>
+                    <button class="nav-btn" id="nextDayBtn">Berikutnya ▶</button>
+                </div>
+                <div class="right">
+                    <button class="action-btn" id="exportCsvBtn">📥 Unduh CSV</button>
+                    <button class="action-btn danger" id="clearLogBtn">🗑️ Hapus Riwayat</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="log-table" id="logTable">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Waktu Transmisi</th>
+                            <th>
+                                DATA AKTUAL SENSOR
+                                <span class="sub">Arus PLN / Teg PLN / Arus INV / Teg INV / Delay ATS</span>
+                            </th>
+                            <th>
+                                STATUS SISTEM
+                                <span class="sub">Sumber / ATS</span>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="logBody">
+                        <tr>
+                            <td colspan="4" class="no-data">Belum ada data riwayat. Tunggu pembacaan sensor...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ===== FOOTER ===== -->
+        <div class="footer-ts">
+            <span>🔄</span> Terakhir diperbarui: <span id="footerTimestamp">--</span>
+            <span style="opacity:0.25;">|</span>
+            <span style="opacity:0.4; font-size:0.7rem;">sumber: Firebase Realtime</span>
         </div>
 
     </div>
 
+    <!-- ================================================================
+    JAVASCRIPT — FIREBASE + LOGIKA DASHBOARD
+    ================================================================ -->
     <script>
         // ================================================================
         //  KONFIGURASI FIREBASE
@@ -628,151 +943,246 @@
         // ================================================================
         //  DOM REFS
         // ================================================================
-        const elArusPLN = document.getElementById('pln-arus');
-        const elTegPLN = document.getElementById('pln-tegangan');
-        const elArusINV = document.getElementById('inv-arus');
-        const elTegINV = document.getElementById('inv-tegangan');
-        const elDelayATS = document.getElementById('ats-delay');
-        const elStatusArusPLN = document.getElementById('pln-arus-status');
-        const elStatusTegPLN = document.getElementById('pln-tegangan-status');
-        const elStatusArusINV = document.getElementById('inv-arus-status');
-        const elStatusTegINV = document.getElementById('inv-tegangan-status');
-        const elStatusDelay = document.getElementById('ats-delay-status');
-        const elLastUpdate = document.getElementById('last-update');
+        const elPlnArus = document.getElementById('plnArus');
+        const elPlnTeg = document.getElementById('plnTeg');
+        const elInvArus = document.getElementById('invArus');
+        const elInvTeg = document.getElementById('invTeg');
+        const elAtsDelay = document.getElementById('atsDelay');
+        const elPlnArusStat = document.getElementById('plnArusStatus');
+        const elPlnTegStat = document.getElementById('plnTegStatus');
+        const elInvArusStat = document.getElementById('invArusStatus');
+        const elInvTegStat = document.getElementById('invTegStatus');
+        const elAtsDelayStat = document.getElementById('atsDelayStatus');
+        const elFooterTs = document.getElementById('footerTimestamp');
+        const elLastUpdateLabel = document.getElementById('lastUpdateLabel');
+        const elSumberAktif = document.getElementById('sumberAktif');
+        const elStatusATS = document.getElementById('statusATS');
+        const elLogBody = document.getElementById('logBody');
+        const elLogDateLabel = document.getElementById('logDateLabel');
 
-        // Semua elemen value untuk animasi pulse
-        const allValueEls = [elArusPLN, elTegPLN, elArusINV, elTegINV, elDelayATS];
-
-        // Data terakhir untuk export
+        // ================================================================
+        //  STATE
+        // ================================================================
         let lastSensorData = null;
         let lastAtsData = null;
+        let historyData = [];
+        let currentDate = new Date();
         let lastUpdateTime = Date.now();
-
-        // ================================================================
-        //  FUNGSI UPDATE TAMPILAN
-        // ================================================================
-        function updateDashboard(sensorData, atsData) {
-            let updated = false;
-
-            // --- Sensor ---
-            if (sensorData) {
-                const arusPLN = (sensorData.pln_arus !== undefined && sensorData.pln_arus !== null) ?
-                    sensorData.pln_arus.toFixed(2) :
-                    '--';
-                const tegPLN = (sensorData.pln_tegangan !== undefined && sensorData.pln_tegangan !== null) ?
-                    sensorData.pln_tegangan.toFixed(1) :
-                    '--';
-                const arusINV = (sensorData.inverter_arus !== undefined && sensorData.inverter_arus !== null) ?
-                    sensorData.inverter_arus.toFixed(2) :
-                    '--';
-                const tegINV = (sensorData.inverter_tegangan !== undefined && sensorData.inverter_tegangan !== null) ?
-                    sensorData.inverter_tegangan.toFixed(1) :
-                    '--';
-
-                // Update value dan pulse jika berubah
-                if (elArusPLN.textContent !== arusPLN) {
-                    elArusPLN.textContent = arusPLN;
-                    pulseElement(elArusPLN);
-                }
-                if (elTegPLN.textContent !== tegPLN) {
-                    elTegPLN.textContent = tegPLN;
-                    pulseElement(elTegPLN);
-                }
-                if (elArusINV.textContent !== arusINV) {
-                    elArusINV.textContent = arusINV;
-                    pulseElement(elArusINV);
-                }
-                if (elTegINV.textContent !== tegINV) {
-                    elTegINV.textContent = tegINV;
-                    pulseElement(elTegINV);
-                }
-
-                // Status
-                setStatus(elStatusArusPLN, arusPLN !== '--', 'online', 'offline', '● Normal', 'Tidak ada data');
-                setStatus(elStatusTegPLN, tegPLN !== '--', 'online', 'offline', '● Normal', 'Tidak ada data');
-                setStatus(elStatusArusINV, arusINV !== '--', 'online', 'offline', '● Normal', 'Tidak ada data');
-                setStatus(elStatusTegINV, tegINV !== '--', 'online', 'offline', '● Normal', 'Tidak ada data');
-
-                lastSensorData = sensorData;
-                updated = true;
-            } else {
-                // Data sensor null → reset
-                ['--', '--', '--', '--'].forEach((v, i) => {
-                    const els = [elArusPLN, elTegPLN, elArusINV, elTegINV];
-                    if (els[i].textContent !== v) els[i].textContent = v;
-                });
-                setStatus(elStatusArusPLN, false, 'offline', 'offline', 'Tidak ada data', 'Tidak ada data');
-                setStatus(elStatusTegPLN, false, 'offline', 'offline', 'Tidak ada data', 'Tidak ada data');
-                setStatus(elStatusArusINV, false, 'offline', 'offline', 'Tidak ada data', 'Tidak ada data');
-                setStatus(elStatusTegINV, false, 'offline', 'offline', 'Tidak ada data', 'Tidak ada data');
-                lastSensorData = null;
-                updated = true;
-            }
-
-            // --- ATS ---
-            if (atsData) {
-                const delay = (atsData.delay !== undefined && atsData.delay !== null) ?
-                    atsData.delay.toFixed(1) :
-                    '--';
-                if (elDelayATS.textContent !== delay) {
-                    elDelayATS.textContent = delay;
-                    pulseElement(elDelayATS);
-                }
-                setStatus(elStatusDelay, delay !== '--', 'ready', 'offline', '● Siap', 'Tidak ada data');
-                lastAtsData = atsData;
-                updated = true;
-            } else {
-                if (elDelayATS.textContent !== '--') elDelayATS.textContent = '--';
-                setStatus(elStatusDelay, false, 'offline', 'offline', 'Tidak ada data', 'Tidak ada data');
-                lastAtsData = null;
-                updated = true;
-            }
-
-            // --- Timestamp ---
-            if (sensorData && sensorData.timestamp) {
-                const ts = new Date(sensorData.timestamp);
-                if (!isNaN(ts.getTime())) {
-                    elLastUpdate.textContent = ts.toLocaleString('id-ID');
-                    lastUpdateTime = ts.getTime();
-                } else {
-                    elLastUpdate.textContent = new Date().toLocaleString('id-ID');
-                }
-            } else if (atsData && atsData.last_switch) {
-                const ts = new Date(atsData.last_switch);
-                if (!isNaN(ts.getTime())) {
-                    elLastUpdate.textContent = ts.toLocaleString('id-ID');
-                    lastUpdateTime = ts.getTime();
-                } else {
-                    elLastUpdate.textContent = new Date().toLocaleString('id-ID');
-                }
-            } else {
-                elLastUpdate.textContent = new Date().toLocaleString('id-ID');
-            }
-        }
 
         // ================================================================
         //  FUNGSI BANTU
         // ================================================================
-        function setStatus(el, isActive, activeClass, inactiveClass, activeText, inactiveText) {
+        function fmt(v, d = 2) {
+            if (v === undefined || v === null || !isFinite(v)) return '--';
+            return Number(v).toFixed(d);
+        }
+
+        function setStatusBadge(el, isActive, activeClass, activeText, inactiveText) {
             if (isActive) {
-                el.className = 'status ' + activeClass;
+                el.className = 'status-badge ' + activeClass;
                 el.textContent = activeText;
             } else {
-                el.className = 'status ' + inactiveClass;
-                el.textContent = inactiveText;
+                el.className = 'status-badge offline';
+                el.textContent = inactiveText || 'Tidak ada data';
             }
         }
 
-        function pulseElement(el) {
-            el.classList.remove('update-pulse');
-            // Force reflow
+        function pulseValue(el) {
+            el.classList.remove('pulse');
             void el.offsetWidth;
-            el.classList.add('update-pulse');
-            setTimeout(() => el.classList.remove('update-pulse'), 400);
+            el.classList.add('pulse');
+            setTimeout(() => el.classList.remove('pulse'), 400);
+        }
+
+        function formatTime(ts) {
+            if (!ts) return '--';
+            const d = new Date(ts);
+            if (isNaN(d.getTime())) return '--';
+            return d.toLocaleString('id-ID', { hour12: false });
+        }
+
+        function formatDate(d) {
+            return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
 
         // ================================================================
-        //  LISTENER REAL-TIME
+        //  UPDATE DASHBOARD UTAMA
+        // ================================================================
+        function updateDashboard(sensorData, atsData) {
+            // --- SENSOR ---
+            if (sensorData) {
+                const aPln = (sensorData.pln_arus !== undefined && sensorData.pln_arus !== null) ? sensorData.pln_arus :
+                    null;
+                const tPln = (sensorData.pln_tegangan !== undefined && sensorData.pln_tegangan !== null) ? sensorData
+                    .pln_tegangan : null;
+                const aInv = (sensorData.inverter_arus !== undefined && sensorData.inverter_arus !== null) ? sensorData
+                    .inverter_arus : null;
+                const tInv = (sensorData.inverter_tegangan !== undefined && sensorData.inverter_tegangan !== null) ?
+                    sensorData.inverter_tegangan : null;
+
+                const aPlnStr = (aPln !== null) ? fmt(aPln, 2) : '--';
+                const tPlnStr = (tPln !== null) ? fmt(tPln, 1) : '--';
+                const aInvStr = (aInv !== null) ? fmt(aInv, 2) : '--';
+                const tInvStr = (tInv !== null) ? fmt(tInv, 1) : '--';
+
+                if (elPlnArus.textContent !== aPlnStr) { elPlnArus.textContent = aPlnStr;
+                    pulseValue(elPlnArus); }
+                if (elPlnTeg.textContent !== tPlnStr) { elPlnTeg.textContent = tPlnStr;
+                    pulseValue(elPlnTeg); }
+                if (elInvArus.textContent !== aInvStr) { elInvArus.textContent = aInvStr;
+                    pulseValue(elInvArus); }
+                if (elInvTeg.textContent !== tInvStr) { elInvTeg.textContent = tInvStr;
+                    pulseValue(elInvTeg); }
+
+                setStatusBadge(elPlnArusStat, aPln !== null, 'online', '● Normal', 'Tidak ada data');
+                setStatusBadge(elPlnTegStat, tPln !== null, 'online', '● Normal', 'Tidak ada data');
+                setStatusBadge(elInvArusStat, aInv !== null, 'online', '● Normal', 'Tidak ada data');
+                setStatusBadge(elInvTegStat, tInv !== null, 'online', '● Normal', 'Tidak ada data');
+
+                lastSensorData = sensorData;
+            } else {
+                elPlnArus.textContent = '--';
+                elPlnTeg.textContent = '--';
+                elInvArus.textContent = '--';
+                elInvTeg.textContent = '--';
+                setStatusBadge(elPlnArusStat, false, 'offline', 'Tidak ada data', 'Tidak ada data');
+                setStatusBadge(elPlnTegStat, false, 'offline', 'Tidak ada data', 'Tidak ada data');
+                setStatusBadge(elInvArusStat, false, 'offline', 'Tidak ada data', 'Tidak ada data');
+                setStatusBadge(elInvTegStat, false, 'offline', 'Tidak ada data', 'Tidak ada data');
+                lastSensorData = null;
+            }
+
+            // --- ATS DELAY ---
+            if (atsData) {
+                const d = (atsData.delay !== undefined && atsData.delay !== null) ? atsData.delay : null;
+                const dStr = (d !== null) ? fmt(d, 1) : '--';
+                if (elAtsDelay.textContent !== dStr) { elAtsDelay.textContent = dStr;
+                    pulseValue(elAtsDelay); }
+                setStatusBadge(elAtsDelayStat, d !== null, 'ready', '● Siap', 'Tidak ada data');
+                lastAtsData = atsData;
+            } else {
+                elAtsDelay.textContent = '--';
+                setStatusBadge(elAtsDelayStat, false, 'offline', 'Tidak ada data', 'Tidak ada data');
+                lastAtsData = null;
+            }
+
+            // --- STATUS SISTEM (Ringkasan) ---
+            const aPln = (sensorData && sensorData.pln_arus !== undefined && sensorData.pln_arus !== null) ? sensorData
+                .pln_arus : null;
+            const aInv = (sensorData && sensorData.inverter_arus !== undefined && sensorData.inverter_arus !== null) ?
+                sensorData.inverter_arus : null;
+
+            let sumber = '—';
+            let sumberClass = 'info';
+            if (aPln !== null && aPln > 0.1) {
+                sumber = '⚡ PLN';
+                sumberClass = 'ok';
+            } else if (aInv !== null && aInv > 0.1) {
+                sumber = '☀️ Inverter';
+                sumberClass = 'info';
+            } else {
+                sumber = '⛔ Tidak Ada';
+                sumberClass = 'err';
+            }
+            elSumberAktif.textContent = sumber;
+            elSumberAktif.className = 'status-value ' + sumberClass;
+
+            const dAts = (atsData && atsData.delay !== undefined && atsData.delay !== null) ? atsData.delay : null;
+            let atsStat = '—',
+                atsClass = 'info';
+            if (dAts !== null && dAts < 2) { atsStat = 'Siap Transfer';
+                atsClass = 'ok'; } else if (dAts !== null && dAts >= 2 && dAts < 10) { atsStat = 'Siaga';
+                atsClass = 'info'; } else if (dAts !== null && dAts >= 10) { atsStat = 'Tertunda';
+                atsClass = 'warn'; } else { atsStat = '—';
+                atsClass = 'err'; }
+            elStatusATS.textContent = atsStat;
+            elStatusATS.className = 'status-value ' + atsClass;
+
+            // --- TIMESTAMP ---
+            let ts = null;
+            if (sensorData && sensorData.timestamp) {
+                ts = sensorData.timestamp;
+            } else if (atsData && atsData.last_switch) {
+                ts = atsData.last_switch;
+            }
+            if (ts) {
+                const d = new Date(ts);
+                if (!isNaN(d.getTime())) {
+                    const str = d.toLocaleString('id-ID', { hour12: false });
+                    elFooterTs.textContent = str;
+                    elLastUpdateLabel.textContent = '⏱️ ' + str;
+                    lastUpdateTime = d.getTime();
+                } else {
+                    const now = new Date().toLocaleString('id-ID', { hour12: false });
+                    elFooterTs.textContent = now;
+                    elLastUpdateLabel.textContent = '⏱️ ' + now;
+                }
+            } else {
+                const now = new Date().toLocaleString('id-ID', { hour12: false });
+                elFooterTs.textContent = now;
+                elLastUpdateLabel.textContent = '⏱️ ' + now;
+            }
+
+            // --- SIMPAN KE RIWAYAT ---
+            if (sensorData && (aPln !== null || aInv !== null)) {
+                const entry = {
+                    timestamp: ts || Date.now(),
+                    plnArus: aPln,
+                    plnTeg: (sensorData && sensorData.pln_tegangan !== undefined && sensorData.pln_tegangan !== null) ?
+                        sensorData.pln_tegangan : null,
+                    invArus: aInv,
+                    invTeg: (sensorData && sensorData.inverter_tegangan !== undefined && sensorData.inverter_tegangan !==
+                        null) ? sensorData.inverter_tegangan : null,
+                    delay: dAts,
+                    sumber: sumber,
+                    ats: atsStat
+                };
+                const last = historyData.length > 0 ? historyData[historyData.length - 1] : null;
+                if (!last || Math.abs(last.timestamp - entry.timestamp) > 3000) {
+                    historyData.push(entry);
+                    if (historyData.length > 1000) historyData.shift();
+                    renderLogTable();
+                }
+            }
+        }
+
+        // ================================================================
+        //  RENDER TABEL RIWAYAT
+        // ================================================================
+        function renderLogTable() {
+            const tbody = elLogBody;
+            if (historyData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="no-data">Belum ada data riwayat. Tunggu pembacaan sensor...</td></tr>`;
+                return;
+            }
+
+            const sorted = [...historyData].reverse();
+            let html = '';
+            sorted.forEach((item, idx) => {
+                const no = idx + 1;
+                const waktu = formatTime(item.timestamp);
+                const aPln = item.plnArus !== null ? fmt(item.plnArus, 2) : '--';
+                const tPln = item.plnTeg !== null ? fmt(item.plnTeg, 1) : '--';
+                const aInv = item.invArus !== null ? fmt(item.invArus, 2) : '--';
+                const tInv = item.invTeg !== null ? fmt(item.invTeg, 1) : '--';
+                const dly = item.delay !== null ? fmt(item.delay, 1) : '--';
+
+                const sensorStr =
+                    `${aPln} A / ${tPln} V / ${aInv} A / ${tInv} V / ${dly} detik`;
+                const statusStr = `${item.sumber || '—'} · ${item.ats || '—'}`;
+
+                html += `<tr>
+                        <td>${no}</td>
+                        <td>${waktu}</td>
+                        <td>${sensorStr}</td>
+                        <td>${statusStr}</td>
+                    </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        // ================================================================
+        //  LISTENER REAL-TIME FIREBASE
         // ================================================================
         const sensorsRef = database.ref('/sensors');
         const atsRef = database.ref('/ats');
@@ -780,38 +1190,51 @@
         sensorsRef.on('value', (snapshot) => {
             const data = snapshot.val();
             updateDashboard(data, lastAtsData);
-        }, (error) => {
-            console.error('Gagal membaca sensor:', error);
-        });
+        }, (err) => console.error('Sensor error:', err));
 
         atsRef.on('value', (snapshot) => {
             const data = snapshot.val();
             updateDashboard(lastSensorData, data);
-        }, (error) => {
-            console.error('Gagal membaca ATS:', error);
-        });
+        }, (err) => console.error('ATS error:', err));
 
         // ================================================================
-        //  AMBIL DATA AWAL SEKALI
+        //  AMBIL DATA AWAL
         // ================================================================
         Promise.all([
             sensorsRef.once('value'),
             atsRef.once('value')
         ]).then(([snapSensor, snapAts]) => {
             updateDashboard(snapSensor.val(), snapAts.val());
-        }).catch(err => console.warn('Initial load error:', err));
+        }).catch(err => console.warn('Init load error:', err));
 
         // ================================================================
-        //  EXPORT KE EXCEL — VERSI TERSTRUKTUR & RAPI
+        //  NAVIGASI TANGGAL
+        // ================================================================
+        let dateOffset = 0;
+        document.getElementById('prevDayBtn').addEventListener('click', () => {
+            dateOffset--;
+            updateDateLabel();
+        });
+        document.getElementById('nextDayBtn').addEventListener('click', () => {
+            dateOffset++;
+            updateDateLabel();
+        });
+
+        function updateDateLabel() {
+            const d = new Date();
+            d.setDate(d.getDate() + dateOffset);
+            elLogDateLabel.textContent = formatDate(d) + (dateOffset === 0 ? ' (Hari Ini)' : '');
+        }
+
+        // ================================================================
+        //  EXPORT EXCEL
         // ================================================================
         document.getElementById('exportBtn').addEventListener('click', async function() {
             const btn = this;
-            const origText = btn.innerHTML;
-            btn.innerHTML = '⏳ Memproses...';
             btn.disabled = true;
+            btn.innerHTML = '⏳ Memproses...';
 
             try {
-                // Ambil data terbaru dari Firebase
                 const [snapSensor, snapAts] = await Promise.all([
                     sensorsRef.once('value'),
                     atsRef.once('value')
@@ -819,80 +1242,129 @@
                 const sensor = snapSensor.val() || {};
                 const ats = snapAts.val() || {};
 
-                // Format nilai dengan presisi
-                const fmt = (val, digits = 2) => {
-                    if (val === undefined || val === null) return '--';
-                    return Number(val).toFixed(digits);
-                };
-
-                const arusPLN = fmt(sensor.pln_arus, 2);
-                const tegPLN = fmt(sensor.pln_tegangan, 1);
-                const arusINV = fmt(sensor.inverter_arus, 2);
-                const tegINV = fmt(sensor.inverter_tegangan, 1);
-                const delayATS = fmt(ats.delay, 1);
-
-                const timestampSensor = sensor.timestamp ? new Date(sensor.timestamp).toLocaleString('id-ID') : '--';
-                const lastSwitch = ats.last_switch ? new Date(ats.last_switch).toLocaleString('id-ID') : '--';
-
-                // Bangun data untuk Excel
-                const now = new Date().toLocaleString('id-ID');
+                const now = new Date().toLocaleString('id-ID', { hour12: false });
                 const rows = [
                     ['📋 LAPORAN MONITORING ATS'],
                     ['Waktu Export', now],
                     [''],
                     ['Parameter', 'Nilai', 'Satuan'],
-                    ['Arus PLN', arusPLN, 'A'],
-                    ['Tegangan PLN', tegPLN, 'V'],
-                    ['Arus Inverter', arusINV, 'A'],
-                    ['Tegangan Inverter', tegINV, 'V'],
-                    ['Time Delay ATS', delayATS, 'detik'],
+                    ['Arus PLN', sensor.pln_arus !== undefined ? fmt(sensor.pln_arus, 2) : '--', 'A'],
+                    ['Tegangan PLN', sensor.pln_tegangan !== undefined ? fmt(sensor.pln_tegangan, 1) : '--',
+                    'V'],
+                    ['Arus Inverter', sensor.inverter_arus !== undefined ? fmt(sensor.inverter_arus, 2) : '--',
+                        'A'],
+                    ['Tegangan Inverter', sensor.inverter_tegangan !== undefined ? fmt(sensor.inverter_tegangan,
+                        1) : '--', 'V'],
+                    ['Time Delay ATS', ats.delay !== undefined ? fmt(ats.delay, 1) : '--', 'detik'],
                     [''],
-                    ['Informasi Tambahan', '', ''],
-                    ['Timestamp Sensor', timestampSensor, ''],
-                    ['Last Switch ATS', lastSwitch, ''],
+                    ['Timestamp Sensor', sensor.timestamp ? new Date(sensor.timestamp).toLocaleString('id-ID',
+                        { hour12: false }) : '--', ''],
+                    ['Last Switch ATS', ats.last_switch ? new Date(ats.last_switch).toLocaleString('id-ID',
+                        { hour12: false }) : '--', ''],
+                    [''],
+                    ['RIWAYAT LOG (terbaru)'],
+                    ['No', 'Waktu', 'Arus PLN (A)', 'Teg PLN (V)', 'Arus INV (A)', 'Teg INV (V)', 'Delay ATS (detik)',
+                        'Sumber', 'ATS'
+                    ]
                 ];
 
-                // Buat workbook dan worksheet
+                const sorted = [...historyData].reverse();
+                const limit = Math.min(sorted.length, 100);
+                for (let i = 0; i < limit; i++) {
+                    const item = sorted[i];
+                    rows.push([
+                        i + 1,
+                        formatTime(item.timestamp),
+                        item.plnArus !== null ? fmt(item.plnArus, 2) : '--',
+                        item.plnTeg !== null ? fmt(item.plnTeg, 1) : '--',
+                        item.invArus !== null ? fmt(item.invArus, 2) : '--',
+                        item.invTeg !== null ? fmt(item.invTeg, 1) : '--',
+                        item.delay !== null ? fmt(item.delay, 1) : '--',
+                        item.sumber || '--',
+                        item.ats || '--'
+                    ]);
+                }
+
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.aoa_to_sheet(rows);
-
-                // Atur lebar kolom agar rapi
-                ws['!cols'] = [
-                    { wch: 22 }, // kolom A: Parameter
-                    { wch: 20 }, // kolom B: Nilai
-                    { wch: 14 } // kolom C: Satuan
-                ];
-
-                // Tambahkan sheet ke workbook
+                ws['!cols'] = [{ wch: 6 }, { wch: 22 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 },
+                { wch: 16 }, { wch: 14 }, { wch: 14 }];
                 XLSX.utils.book_append_sheet(wb, ws, 'Monitoring');
-
-                // Generate file dan unduh
                 XLSX.writeFile(wb, `Monitoring_ATS_${new Date().toISOString().slice(0,10)}.xlsx`);
 
                 btn.innerHTML = '✅ Berhasil!';
-                setTimeout(() => {
-                    btn.innerHTML = origText;
-                    btn.disabled = false;
-                }, 1800);
+                setTimeout(() => { btn.innerHTML = '📊 Export Excel';
+                    btn.disabled = false; }, 1600);
             } catch (err) {
                 console.error('Export error:', err);
-                alert('Gagal mengunduh file Excel. Periksa koneksi atau data Firebase.');
-                btn.innerHTML = origText;
+                alert('Gagal mengunduh file Excel. Periksa koneksi.');
+                btn.innerHTML = '📊 Export Excel';
                 btn.disabled = false;
             }
         });
 
         // ================================================================
-        //  UPDATE OTOMATIS TIMESTAMP SETIAP 5 DETIK (jika tidak ada update)
+        //  EXPORT CSV
+        // ================================================================
+        document.getElementById('exportCsvBtn').addEventListener('click', function() {
+            if (historyData.length === 0) {
+                alert('Belum ada data riwayat untuk diekspor.');
+                return;
+            }
+            let csv = 'No,Waktu,Arus PLN(A),Teg PLN(V),Arus INV(A),Teg INV(V),Delay ATS(detik),Sumber,ATS\n';
+            const sorted = [...historyData].reverse();
+            sorted.forEach((item, i) => {
+                const row = [
+                    i + 1,
+                    formatTime(item.timestamp),
+                    item.plnArus !== null ? fmt(item.plnArus, 2) : '--',
+                    item.plnTeg !== null ? fmt(item.plnTeg, 1) : '--',
+                    item.invArus !== null ? fmt(item.invArus, 2) : '--',
+                    item.invTeg !== null ? fmt(item.invTeg, 1) : '--',
+                    item.delay !== null ? fmt(item.delay, 1) : '--',
+                    item.sumber || '--',
+                    item.ats || '--'
+                ];
+                csv += row.join(',') + '\n';
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Log_ATS_${new Date().toISOString().slice(0,10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // ================================================================
+        //  HAPUS RIWAYAT
+        // ================================================================
+        document.getElementById('clearLogBtn').addEventListener('click', function() {
+            if (historyData.length === 0) {
+                alert('Riwayat sudah kosong.');
+                return;
+            }
+            if (confirm('Hapus semua data riwayat yang tersimpan?')) {
+                historyData = [];
+                renderLogTable();
+            }
+        });
+
+        // ================================================================
+        //  UPDATE TIMESTAMP OTOMATIS
         // ================================================================
         setInterval(() => {
             const now = Date.now();
             if (now - lastUpdateTime > 6000) {
-                elLastUpdate.textContent = new Date().toLocaleString('id-ID');
+                const str = new Date().toLocaleString('id-ID', { hour12: false });
+                elFooterTs.textContent = str;
+                elLastUpdateLabel.textContent = '⏱️ ' + str;
             }
         }, 5000);
 
-        console.log('✅ Dashboard Monitoring ATS siap — real-time aktif!');
+        updateDateLabel();
+        console.log('✅ Dashboard ATS siap — real-time aktif!');
     </script>
 
 </body>
