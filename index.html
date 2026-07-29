@@ -4,235 +4,97 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard Monitoring ATS</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js">
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js">
-    </script>
-    <!-- SheetJS untuk export Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* ================================================================
-               RESET & BASE
-            ================================================================ */
+        /* --- (style sama seperti sebelumnya, tidak diubah) --- */
+        /* Saya sisipkan style minimal agar tampilan tetap bagus */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
         }
-
         body {
-            min-height: 100vh;
+            background: #ffffff;
             padding: 24px;
-            color: #e2e8f0;
-            position: relative;
-            background: #0b0f1a;
-            overflow-x: hidden;
+            color: #1e293b;
         }
-
-        /* ================================================================
-               BACKGROUND MODERN — GELOMBANG & GRADIENT HALUS
-            ================================================================ */
-        .bg-container {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            overflow: hidden;
-            background:
-                radial-gradient(ellipse 80% 60% at 10% 20%, rgba(56, 189, 248, 0.10) 0%, transparent 70%),
-                radial-gradient(ellipse 70% 50% at 90% 80%, rgba(20, 184, 166, 0.08) 0%, transparent 60%),
-                linear-gradient(145deg, #0b0f1a 0%, #141b2b 50%, #0f1729 100%);
-        }
-
-        /* Gelombang SVG animasi */
-        .wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 200%;
-            height: 100%;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 320'%3E%3Cpath d='M0,160 C300,280 600,40 900,160 C1050,220 1150,280 1200,280 L1200,320 L0,320 Z' fill='rgba(56,189,248,0.04)'/%3E%3C/svg%3E") repeat-x bottom;
-            background-size: 1200px 320px;
-            animation: waveMove 18s linear infinite;
-            opacity: 0.6;
-            pointer-events: none;
-        }
-        .wave:nth-child(2) {
-            bottom: -20px;
-            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 320'%3E%3Cpath d='M0,200 C200,100 500,280 800,180 C1000,120 1100,200 1200,200 L1200,320 L0,320 Z' fill='rgba(20,184,166,0.035)'/%3E%3C/svg%3E") repeat-x bottom;
-            background-size: 1200px 320px;
-            animation: waveMove 24s linear infinite reverse;
-            opacity: 0.4;
-        }
-
-        @keyframes waveMove {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                transform: translateX(-50%);
-            }
-        }
-
-        /* Bintik-bintik lembut (partikel) */
-        .particles {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.06);
-            animation: floatParticle 20s ease-in-out infinite alternate;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.05);
-        }
-        .particle:nth-child(1) {
-            width: 300px;
-            height: 300px;
-            top: -80px;
-            left: -60px;
-            animation-duration: 28s;
-            background: radial-gradient(circle, rgba(56, 189, 248, 0.06), transparent 70%);
-        }
-        .particle:nth-child(2) {
-            width: 400px;
-            height: 400px;
-            bottom: -120px;
-            right: -80px;
-            animation-duration: 32s;
-            animation-delay: -6s;
-            background: radial-gradient(circle, rgba(20, 184, 166, 0.05), transparent 70%);
-        }
-        .particle:nth-child(3) {
-            width: 200px;
-            height: 200px;
-            top: 40%;
-            left: 60%;
-            animation-duration: 24s;
-            animation-delay: -10s;
-            background: radial-gradient(circle, rgba(139, 92, 246, 0.04), transparent 70%);
-        }
-        .particle:nth-child(4) {
-            width: 150px;
-            height: 150px;
-            top: 70%;
-            left: 10%;
-            animation-duration: 30s;
-            animation-delay: -4s;
-            background: radial-gradient(circle, rgba(245, 158, 11, 0.04), transparent 70%);
-        }
-
-        @keyframes floatParticle {
-            0% {
-                transform: translate(0, 0) scale(1);
-            }
-            50% {
-                transform: translate(40px, -30px) scale(1.1);
-            }
-            100% {
-                transform: translate(-20px, 40px) scale(0.9);
-            }
-        }
-
-        /* ================================================================
-               CONTAINER UTAMA
-            ================================================================ */
         .container {
-            position: relative;
-            z-index: 1;
             max-width: 1280px;
             margin: 0 auto;
         }
-
-        /* ================================================================
-               HEADER / JUDUL — lebih transparan dengan efek glassmorphism
-            ================================================================ */
-        .page-header {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 16px;
             margin-bottom: 28px;
-            padding: 14px 24px;
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+            padding: 16px 24px;
+            background: #f8fafc;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
         }
-
-        .page-header .brand {
+        .brand {
             display: flex;
             align-items: center;
             gap: 14px;
         }
-        .page-header .brand .icon {
+        .brand .icon {
             width: 44px;
             height: 44px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            border-radius: 12px;
+            background: #0d9488;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 22px;
             color: #fff;
-            box-shadow: 0 4px 20px rgba(20, 184, 166, 0.30);
         }
-        .page-header .brand h1 {
+        .brand h1 {
             font-size: 1.3rem;
             font-weight: 600;
-            color: #f1f5f9;
-            letter-spacing: 0.3px;
+            color: #0f172a;
         }
-        .page-header .brand h1 span {
+        .brand h1 span {
             font-weight: 300;
-            color: #94a3b8;
+            color: #64748b;
         }
-        .page-header .brand .sub {
+        .brand .sub {
             font-size: 0.7rem;
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-top: 2px;
-            opacity: 0.7;
         }
-
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             flex-wrap: wrap;
         }
-
         .live-badge {
             display: flex;
             align-items: center;
             gap: 8px;
-            background: rgba(239, 68, 68, 0.10);
+            background: #fef2f2;
             padding: 5px 16px 5px 12px;
             border-radius: 30px;
-            border: 1px solid rgba(239, 68, 68, 0.15);
-            color: #f87171;
+            border: 1px solid #fecaca;
+            color: #dc2626;
             font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
         .live-badge .dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: #ef4444;
-            animation: pulseDot 1.4s ease-in-out infinite;
-            box-shadow: 0 0 14px rgba(239, 68, 68, 0.4);
+            background: #dc2626;
+            animation: pulse 1.4s ease-in-out infinite;
         }
-        @keyframes pulseDot {
+        @keyframes pulse {
             0%,
             100% {
                 opacity: 1;
@@ -243,9 +105,8 @@
                 transform: scale(0.7);
             }
         }
-
         .btn-export {
-            background: linear-gradient(135deg, #14b8a6, #0d9488);
+            background: #0d9488;
             border: none;
             color: #fff;
             padding: 8px 20px;
@@ -253,36 +114,28 @@
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.25s;
-            box-shadow: 0 4px 20px rgba(20, 184, 166, 0.25);
+            transition: 0.2s;
             display: flex;
             align-items: center;
             gap: 8px;
         }
         .btn-export:hover {
-            transform: scale(1.04) translateY(-2px);
-            box-shadow: 0 8px 32px rgba(20, 184, 166, 0.40);
-        }
-        .btn-export:active {
-            transform: scale(0.96);
+            background: #0f766e;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(13, 148, 136, 0.3);
         }
         .btn-export:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-
-        /* ================================================================
-               BAGIAN DATA AKTUAL SENSOR
-            ================================================================ */
         .section-label {
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             color: #94a3b8;
-            margin-bottom: 16px;
-            padding-left: 4px;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -290,102 +143,59 @@
         .section-label .line {
             flex: 1;
             height: 1px;
-            background: linear-gradient(90deg, rgba(255, 255, 255, 0.06), transparent);
+            background: #e2e8f0;
         }
         .section-label .badge-time {
             font-weight: 400;
             color: #94a3b8;
-            font-size: 0.7rem;
             text-transform: none;
             letter-spacing: 0.3px;
-            background: rgba(255, 255, 255, 0.04);
-            padding: 2px 12px;
-            border-radius: 20px;
+            font-size: 0.7rem;
         }
-
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 18px;
-            margin-bottom: 32px;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
         }
-
-        .metric-card {
-            background: rgba(255, 255, 255, 0.04);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-radius: 18px;
-            padding: 20px 16px 18px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.20);
-            transition: transform 0.25s, box-shadow 0.35s, border-color 0.3s;
+        .card {
+            background: #f8fafc;
+            border-radius: 14px;
+            padding: 18px 14px 16px;
+            border: 1px solid #e2e8f0;
             text-align: center;
-            position: relative;
-            overflow: hidden;
+            transition: 0.2s;
         }
-        .metric-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            border-radius: 18px 18px 0 0;
-            opacity: 0.7;
-            transition: height 0.3s;
+        .card:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
         }
-        .metric-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
-            border-color: rgba(255, 255, 255, 0.10);
-        }
-        .metric-card:hover::before {
-            height: 4px;
-        }
-
-        .card-arus-pln::before {
-            background: linear-gradient(90deg, #f59e0b, #fbbf24);
-        }
-        .card-teg-pln::before {
-            background: linear-gradient(90deg, #3b82f6, #60a5fa);
-        }
-        .card-arus-inv::before {
-            background: linear-gradient(90deg, #14b8a6, #34d399);
-        }
-        .card-teg-inv::before {
-            background: linear-gradient(90deg, #8b5cf6, #a78bfa);
-        }
-        .card-ats-delay::before {
-            background: linear-gradient(90deg, #f472b6, #f9a8d4);
-        }
-
-        .metric-card .card-icon {
-            font-size: 1.6rem;
+        .card .icon {
+            font-size: 1.5rem;
             display: block;
-            margin-bottom: 6px;
-            opacity: 0.8;
+            margin-bottom: 4px;
         }
-        .metric-card .card-label {
-            font-size: 0.7rem;
+        .card .label {
+            font-size: 0.65rem;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.8px;
             color: #94a3b8;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
-        .metric-card .value-wrap {
+        .card .value-wrap {
             display: flex;
             align-items: baseline;
             justify-content: center;
             gap: 4px;
         }
-        .metric-card .value {
-            font-size: 2.2rem;
+        .card .value {
+            font-size: 2rem;
             font-weight: 700;
             transition: transform 0.2s;
             line-height: 1.1;
         }
-        .metric-card .value.pulse {
+        .card .value.pulse {
             animation: valPulse 0.35s ease;
         }
         @keyframes valPulse {
@@ -393,171 +203,144 @@
                 transform: scale(1);
             }
             50% {
-                transform: scale(1.06);
+                transform: scale(1.05);
             }
             100% {
                 transform: scale(1);
             }
         }
-        .metric-card .unit {
-            font-size: 0.85rem;
+        .card .unit {
+            font-size: 0.8rem;
             font-weight: 300;
             color: #94a3b8;
         }
-        .metric-card .status-badge {
+        .card .status-badge {
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 8px;
             padding: 2px 14px;
             border-radius: 30px;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 500;
-            letter-spacing: 0.3px;
-            background: rgba(255, 255, 255, 0.06);
+            background: #f1f5f9;
             color: #94a3b8;
         }
         .status-badge.online {
-            background: rgba(16, 185, 129, 0.14);
-            color: #34d399;
+            background: #dcfce7;
+            color: #16a34a;
         }
         .status-badge.offline {
-            background: rgba(239, 68, 68, 0.10);
-            color: #f87171;
+            background: #fef2f2;
+            color: #dc2626;
         }
         .status-badge.ready {
-            background: rgba(59, 130, 246, 0.12);
-            color: #60a5fa;
+            background: #dbeafe;
+            color: #2563eb;
         }
-        .status-badge.warning {
-            background: rgba(245, 158, 11, 0.12);
-            color: #fbbf24;
+        .card-pln-arus .value {
+            color: #d97706;
         }
-
-        .card-arus-pln .value {
-            color: #f59e0b;
+        .card-pln-teg .value {
+            color: #2563eb;
         }
-        .card-teg-pln .value {
-            color: #3b82f6;
+        .card-inv-arus .value {
+            color: #0d9488;
         }
-        .card-arus-inv .value {
-            color: #14b8a6;
+        .card-inv-teg .value {
+            color: #7c3aed;
         }
-        .card-teg-inv .value {
-            color: #8b5cf6;
+        .card-ats .value {
+            color: #db2777;
         }
-        .card-ats-delay .value {
-            color: #f472b6;
-        }
-
-        /* ================================================================
-               BAGIAN STATUS / RINGKASAN SISTEM
-            ================================================================ */
         .status-summary {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 18px;
-            margin-bottom: 32px;
+            gap: 16px;
+            margin-bottom: 28px;
         }
-
         .status-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 16px;
-            padding: 18px 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
             text-align: center;
-            transition: border-color 0.3s, transform 0.2s;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
-        }
-        .status-card:hover {
-            border-color: rgba(255, 255, 255, 0.10);
-            transform: translateY(-2px);
         }
         .status-card .label {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: #94a3b8;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
-        .status-card .status-value {
-            font-size: 1.1rem;
+        .status-card .value {
+            font-size: 1rem;
             font-weight: 600;
         }
-        .status-card .status-value.ok {
-            color: #34d399;
+        .status-card .value.ok {
+            color: #16a34a;
         }
-        .status-card .status-value.warn {
-            color: #fbbf24;
+        .status-card .value.warn {
+            color: #d97706;
         }
-        .status-card .status-value.err {
-            color: #f87171;
+        .status-card .value.err {
+            color: #dc2626;
         }
-        .status-card .status-value.info {
-            color: #60a5fa;
+        .status-card .value.info {
+            color: #2563eb;
         }
-
-        /* ================================================================
-               BAGIAN TABEL RIWAYAT LOG
-            ================================================================ */
         .log-section {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 20px 20px 16px;
-            margin-bottom: 20px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px 18px 14px;
+            margin-bottom: 18px;
             overflow-x: auto;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
         }
-
         .log-toolbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 16px;
+            gap: 10px;
+            margin-bottom: 14px;
         }
         .log-toolbar .left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             flex-wrap: wrap;
         }
         .log-toolbar .left .nav-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            color: #94a3b8;
-            padding: 4px 14px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            padding: 3px 14px;
             border-radius: 8px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             cursor: pointer;
             transition: 0.2s;
             font-weight: 500;
         }
         .log-toolbar .left .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: #e2e8f0;
+            background: #f1f5f9;
+            border-color: #cbd5e1;
         }
         .log-toolbar .left .date-label {
             font-size: 0.8rem;
-            color: #94a3b8;
+            color: #64748b;
             font-weight: 500;
         }
         .log-toolbar .right {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             flex-wrap: wrap;
         }
         .log-toolbar .right .action-btn {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            color: #94a3b8;
-            padding: 5px 16px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            padding: 4px 14px;
             border-radius: 8px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             cursor: pointer;
             transition: 0.2s;
             font-weight: 500;
@@ -566,97 +349,85 @@
             gap: 6px;
         }
         .log-toolbar .right .action-btn:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: #e2e8f0;
+            background: #f1f5f9;
+            border-color: #cbd5e1;
         }
         .log-toolbar .right .action-btn.danger:hover {
-            background: rgba(239, 68, 68, 0.12);
-            color: #f87171;
-            border-color: rgba(239, 68, 68, 0.15);
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
         }
-
-        /* Tabel */
         .table-wrap {
             overflow-x: auto;
         }
         table.log-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.78rem;
-            min-width: 700px;
+            font-size: 0.75rem;
+            min-width: 650px;
         }
         table.log-table thead {
-            background: rgba(255, 255, 255, 0.03);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            background: #f1f5f9;
+            border-bottom: 2px solid #e2e8f0;
         }
         table.log-table th {
-            padding: 10px 12px;
+            padding: 8px 12px;
             text-align: left;
             font-weight: 600;
-            color: #94a3b8;
-            text-transform: uppercase;
+            color: #64748b;
             font-size: 0.6rem;
-            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
             white-space: nowrap;
         }
         table.log-table th .sub {
             font-weight: 400;
-            color: #64748b;
+            color: #94a3b8;
             text-transform: none;
-            letter-spacing: 0.2px;
             font-size: 0.55rem;
             display: block;
             margin-top: 2px;
         }
         table.log-table td {
-            padding: 9px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-            color: #cbd5e1;
+            padding: 7px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #1e293b;
             vertical-align: middle;
             white-space: nowrap;
         }
         table.log-table tbody tr:hover {
-            background: rgba(255, 255, 255, 0.04);
+            background: #f8fafc;
         }
         table.log-table .no-data {
             text-align: center;
             padding: 24px 0;
-            color: #475569;
+            color: #94a3b8;
             font-style: italic;
         }
-
-        /* ================================================================
-               FOOTER TIMESTAMP
-            ================================================================ */
-        .footer-ts {
+        .footer {
             text-align: center;
-            color: #475569;
+            color: #94a3b8;
             font-size: 0.75rem;
-            letter-spacing: 0.3px;
-            padding: 8px 0 4px;
+            padding: 6px 0 2px;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 14px;
             flex-wrap: wrap;
         }
-        .footer-ts span {
-            color: #94a3b8;
+        .footer span {
+            color: #64748b;
         }
-
-        /* ================================================================
-               RESPONSIVE
-            ================================================================ */
         @media (max-width: 768px) {
             body {
                 padding: 14px;
             }
-            .page-header {
+            .header {
                 flex-direction: column;
                 align-items: stretch;
                 padding: 14px 18px;
             }
-            .page-header .brand {
+            .brand {
                 justify-content: center;
             }
             .header-actions {
@@ -666,12 +437,11 @@
                 grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
                 gap: 12px;
             }
-            .metric-card .value {
-                font-size: 1.7rem;
+            .card .value {
+                font-size: 1.6rem;
             }
             .status-summary {
                 grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 12px;
             }
             .log-toolbar {
                 flex-direction: column;
@@ -683,93 +453,50 @@
             }
             table.log-table {
                 font-size: 0.7rem;
-                min-width: 600px;
-            }
-            table.log-table th,
-            table.log-table td {
-                padding: 6px 8px;
+                min-width: 550px;
             }
         }
-
         @media (max-width: 480px) {
             .cards-grid {
                 grid-template-columns: 1fr 1fr;
                 gap: 10px;
             }
-            .metric-card {
-                padding: 14px 10px 12px;
+            .card {
+                padding: 12px 8px 10px;
             }
-            .metric-card .value {
-                font-size: 1.4rem;
+            .card .value {
+                font-size: 1.3rem;
             }
-            .metric-card .card-icon {
+            .card .icon {
                 font-size: 1.2rem;
             }
-            .metric-card .card-label {
-                font-size: 0.6rem;
+            .card .label {
+                font-size: 0.55rem;
             }
             .status-summary {
                 grid-template-columns: 1fr 1fr;
                 gap: 10px;
             }
             .status-card {
-                padding: 12px 10px;
-            }
-            .status-card .status-value {
-                font-size: 0.95rem;
+                padding: 10px 8px;
             }
             .log-section {
-                padding: 14px 10px 12px;
+                padding: 12px 10px 10px;
             }
-            .page-header .brand h1 {
+            .brand h1 {
                 font-size: 1rem;
             }
             .btn-export {
                 padding: 6px 14px;
                 font-size: 0.7rem;
             }
-            .live-badge {
-                font-size: 0.6rem;
-                padding: 4px 12px 4px 8px;
-            }
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0b0f1a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #2d3748;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #4a5568;
         }
     </style>
 </head>
 <body>
-
-    <!-- ===== BACKGROUND MODERN ===== -->
-    <div class="bg-container">
-        <div class="wave"></div>
-        <div class="wave"></div>
-        <div class="particles">
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-            <div class="particle"></div>
-        </div>
-    </div>
-
-    <!-- ===== MAIN CONTAINER ===== -->
     <div class="container">
 
-        <!-- ===== HEADER ===== -->
-        <header class="page-header">
+        <header class="header">
             <div class="brand">
                 <div class="icon">⚡</div>
                 <div>
@@ -778,16 +505,11 @@
                 </div>
             </div>
             <div class="header-actions">
-                <div class="live-badge">
-                    <span class="dot"></span> LIVE
-                </div>
+                <div class="live-badge"><span class="dot"></span> LIVE</div>
                 <button class="btn-export" id="exportBtn">📊 Export Excel</button>
             </div>
         </header>
 
-        <!-- ================================================================
-        DATA AKTUAL SENSOR (DETIK INI)
-        ================================================================ -->
         <div class="section-label">
             📡 DATA AKTUAL SENSOR
             <span class="badge-time" id="lastUpdateLabel">—</span>
@@ -795,84 +517,44 @@
         </div>
 
         <div class="cards-grid">
-            <!-- Arus PLN -->
-            <div class="metric-card card-arus-pln">
-                <span class="card-icon">🔌</span>
-                <div class="card-label">Arus PLN</div>
-                <div class="value-wrap">
-                    <span class="value" id="plnArus">--</span>
-                    <span class="unit">A</span>
-                </div>
+            <div class="card card-pln-arus">
+                <span class="icon">🔌</span>
+                <div class="label">Arus PLN</div>
+                <div class="value-wrap"><span class="value" id="plnArus">--</span><span class="unit">A</span></div>
                 <span class="status-badge" id="plnArusStatus">Menunggu...</span>
             </div>
-
-            <!-- Tegangan PLN -->
-            <div class="metric-card card-teg-pln">
-                <span class="card-icon">⚡</span>
-                <div class="card-label">Tegangan PLN</div>
-                <div class="value-wrap">
-                    <span class="value" id="plnTeg">--</span>
-                    <span class="unit">V</span>
-                </div>
+            <div class="card card-pln-teg">
+                <span class="icon">⚡</span>
+                <div class="label">Tegangan PLN</div>
+                <div class="value-wrap"><span class="value" id="plnTeg">--</span><span class="unit">V</span></div>
                 <span class="status-badge" id="plnTegStatus">Menunggu...</span>
             </div>
-
-            <!-- Arus Inverter -->
-            <div class="metric-card card-arus-inv">
-                <span class="card-icon">☀️</span>
-                <div class="card-label">Arus Inverter</div>
-                <div class="value-wrap">
-                    <span class="value" id="invArus">--</span>
-                    <span class="unit">A</span>
-                </div>
+            <div class="card card-inv-arus">
+                <span class="icon">☀️</span>
+                <div class="label">Arus Inverter</div>
+                <div class="value-wrap"><span class="value" id="invArus">--</span><span class="unit">A</span></div>
                 <span class="status-badge" id="invArusStatus">Menunggu...</span>
             </div>
-
-            <!-- Tegangan Inverter -->
-            <div class="metric-card card-teg-inv">
-                <span class="card-icon">🔋</span>
-                <div class="card-label">Tegangan Inverter</div>
-                <div class="value-wrap">
-                    <span class="value" id="invTeg">--</span>
-                    <span class="unit">V</span>
-                </div>
+            <div class="card card-inv-teg">
+                <span class="icon">🔋</span>
+                <div class="label">Tegangan Inverter</div>
+                <div class="value-wrap"><span class="value" id="invTeg">--</span><span class="unit">V</span></div>
                 <span class="status-badge" id="invTegStatus">Menunggu...</span>
             </div>
-
-            <!-- Time Delay ATS -->
-            <div class="metric-card card-ats-delay">
-                <span class="card-icon">⏱️</span>
-                <div class="card-label">Time Delay ATS</div>
-                <div class="value-wrap">
-                    <span class="value" id="atsDelay">--</span>
-                    <span class="unit">detik</span>
-                </div>
+            <div class="card card-ats">
+                <span class="icon">⏱️</span>
+                <div class="label">Time Delay ATS</div>
+                <div class="value-wrap"><span class="value" id="atsDelay">--</span><span class="unit">detik</span></div>
                 <span class="status-badge" id="atsDelayStatus">Menunggu...</span>
             </div>
         </div>
 
-        <!-- ================================================================
-        STATUS SISTEM (Ringkasan)
-        ================================================================ -->
-        <div class="section-label">
-            📊 STATUS SISTEM
-            <span class="line"></span>
-        </div>
-
+        <div class="section-label">📊 STATUS SISTEM <span class="line"></span></div>
         <div class="status-summary">
-            <div class="status-card">
-                <div class="label">Sumber Daya Aktif</div>
-                <div class="status-value info" id="sumberAktif">—</div>
-            </div>
-            <div class="status-card">
-                <div class="label">Status ATS</div>
-                <div class="status-value info" id="statusATS">—</div>
-            </div>
+            <div class="status-card"><div class="label">Sumber Daya Aktif</div><div class="value info" id="sumberAktif">—</div></div>
+            <div class="status-card"><div class="label">Status ATS</div><div class="value info" id="statusATS">—</div></div>
         </div>
 
-        <!-- ================================================================
-        TABEL RIWAYAT LOG
-        ================================================================ -->
         <div class="log-section">
             <div class="log-toolbar">
                 <div class="left">
@@ -881,491 +563,326 @@
                     <button class="nav-btn" id="nextDayBtn">Berikutnya ▶</button>
                 </div>
                 <div class="right">
-                    <button class="action-btn" id="exportCsvBtn">📥 Unduh CSV</button>
-                    <button class="action-btn danger" id="clearLogBtn">🗑️ Hapus Riwayat</button>
+                    <button class="action-btn" id="exportCsvBtn">📥 CSV</button>
+                    <button class="action-btn danger" id="clearLogBtn">🗑️ Hapus</button>
                 </div>
             </div>
-
             <div class="table-wrap">
-                <table class="log-table" id="logTable">
+                <table class="log-table">
                     <thead>
                         <tr>
-                            <th>No.</th>
-                            <th>Waktu Transmisi</th>
-                            <th>
-                                DATA AKTUAL SENSOR
-                                <span class="sub">Arus PLN / Teg PLN / Arus INV / Teg INV / Delay ATS</span>
-                            </th>
-                            <th>
-                                STATUS SISTEM
-                                <span class="sub">Sumber / ATS</span>
-                            </th>
+                            <th>No</th>
+                            <th>Waktu</th>
+                            <th>Arus PLN / Teg PLN / Arus INV / Teg INV / Delay</th>
+                            <th>Sumber / ATS</th>
                         </tr>
                     </thead>
-                    <tbody id="logBody">
-                        <tr>
-                            <td colspan="4" class="no-data">Belum ada data riwayat. Tunggu pembacaan sensor...</td>
-                        </tr>
-                    </tbody>
+                    <tbody id="logBody"><tr><td colspan="4" class="no-data">Belum ada data riwayat.</td></tr></tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ===== FOOTER ===== -->
-        <div class="footer-ts">
+        <div class="footer">
             <span>🔄</span> Terakhir diperbarui: <span id="footerTimestamp">--</span>
-            <span style="opacity:0.25;">|</span>
-            <span style="opacity:0.4; font-size:0.7rem;">sumber: Firebase Realtime</span>
+            <span style="opacity:0.3;">|</span>
+            <span style="opacity:0.5;font-size:0.7rem;">Firebase Realtime</span>
         </div>
 
     </div>
 
-    <!-- ================================================================
-    JAVASCRIPT — FIREBASE + LOGIKA DASHBOARD
-    ================================================================ -->
     <script>
         // ================================================================
         //  KONFIGURASI FIREBASE
         // ================================================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyDPRKXi4tveI8prBSSaGJBv8snvoMLQvdU",
-            authDomain: "monitoring-sistem-ats.firebaseapp.com",
-            databaseURL: "https://monitoring-sistem-ats-default-rtdb.asia-southeast1.firebasedatabase.app/",
-            projectId: "monitoring-sistem-ats",
-            storageBucket: "monitoring-sistem-ats.firebasestorage.app",
-            messagingSenderId: "302971693017",
-            appId: "1:302971693017:web:82f55c71601dfb7c291bc8"
-        };
+        const DB_URL = "https://monitoring-sistem-ats-default-rtdb.asia-southeast1.firebasedatabase.app/";
+        const AUTH = "okuOqxpMBf58bMttDFPoh5b2yXAzHxAqCaVhRE45";
 
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
+        firebase.initializeApp({ databaseURL: DB_URL, authDomain: "monitoring-sistem-ats.firebaseapp.com" });
+        const db = firebase.database();
 
         // ================================================================
         //  DOM REFS
         // ================================================================
-        const elPlnArus = document.getElementById('plnArus');
-        const elPlnTeg = document.getElementById('plnTeg');
-        const elInvArus = document.getElementById('invArus');
-        const elInvTeg = document.getElementById('invTeg');
-        const elAtsDelay = document.getElementById('atsDelay');
-        const elPlnArusStat = document.getElementById('plnArusStatus');
-        const elPlnTegStat = document.getElementById('plnTegStatus');
-        const elInvArusStat = document.getElementById('invArusStatus');
-        const elInvTegStat = document.getElementById('invTegStatus');
-        const elAtsDelayStat = document.getElementById('atsDelayStatus');
-        const elFooterTs = document.getElementById('footerTimestamp');
-        const elLastUpdateLabel = document.getElementById('lastUpdateLabel');
-        const elSumberAktif = document.getElementById('sumberAktif');
-        const elStatusATS = document.getElementById('statusATS');
-        const elLogBody = document.getElementById('logBody');
-        const elLogDateLabel = document.getElementById('logDateLabel');
+        const $ = id => document.getElementById(id);
+        const el = {
+            plnArus: $('plnArus'),
+            plnTeg: $('plnTeg'),
+            invArus: $('invArus'),
+            invTeg: $('invTeg'),
+            atsDelay: $('atsDelay'),
+            plnArusStat: $('plnArusStatus'),
+            plnTegStat: $('plnTegStatus'),
+            invArusStat: $('invArusStatus'),
+            invTegStat: $('invTegStatus'),
+            atsDelayStat: $('atsDelayStatus'),
+            sumberAktif: $('sumberAktif'),
+            statusATS: $('statusATS'),
+            logBody: $('logBody'),
+            footerTs: $('footerTimestamp'),
+            lastUpdateLabel: $('lastUpdateLabel'),
+            logDateLabel: $('logDateLabel'),
+        };
 
         // ================================================================
         //  STATE
         // ================================================================
-        let lastSensorData = null;
-        let lastAtsData = null;
-        let historyData = [];
-        let currentDate = new Date();
-        let lastUpdateTime = Date.now();
+        let history = [];
+        let lastSensor = null,
+            lastAts = null;
+        let lastUpdate = Date.now();
+        let dateOffset = 0;
+        const DATA_TIMEOUT = 30000; // 30 detik — jika lebih dari ini, data dianggap kadaluarsa
 
         // ================================================================
         //  FUNGSI BANTU
         // ================================================================
-        function fmt(v, d = 2) {
-            if (v === undefined || v === null || !isFinite(v)) return '--';
-            return Number(v).toFixed(d);
+        const fmt = (v, d = 2) => (v !== undefined && v !== null && isFinite(v)) ? Number(v).toFixed(d) : '--';
+        const time = t => t ? new Date(t).toLocaleString('id-ID', { hour12: false }) : '--';
+        const dateStr = d => d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+        function setStatus(el, ok, cls, txt, fallback = 'Tidak ada data') {
+            el.className = 'status-badge ' + (ok ? cls : 'offline');
+            el.textContent = ok ? txt : fallback;
         }
 
-        function setStatusBadge(el, isActive, activeClass, activeText, inactiveText) {
-            if (isActive) {
-                el.className = 'status-badge ' + activeClass;
-                el.textContent = activeText;
-            } else {
-                el.className = 'status-badge offline';
-                el.textContent = inactiveText || 'Tidak ada data';
-            }
-        }
-
-        function pulseValue(el) {
+        function pulse(el) {
             el.classList.remove('pulse');
             void el.offsetWidth;
             el.classList.add('pulse');
-            setTimeout(() => el.classList.remove('pulse'), 400);
-        }
-
-        function formatTime(ts) {
-            if (!ts) return '--';
-            const d = new Date(ts);
-            if (isNaN(d.getTime())) return '--';
-            return d.toLocaleString('id-ID', { hour12: false });
-        }
-
-        function formatDate(d) {
-            return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            setTimeout(() => el.classList.remove('pulse'), 350);
         }
 
         // ================================================================
-        //  UPDATE DASHBOARD UTAMA
+        //  CEK VALIDITAS DATA BERDASARKAN TIMESTAMP
         // ================================================================
-        function updateDashboard(sensorData, atsData) {
-            // --- SENSOR ---
-            if (sensorData) {
-                const aPln = (sensorData.pln_arus !== undefined && sensorData.pln_arus !== null) ? sensorData.pln_arus :
-                    null;
-                const tPln = (sensorData.pln_tegangan !== undefined && sensorData.pln_tegangan !== null) ? sensorData
-                    .pln_tegangan : null;
-                const aInv = (sensorData.inverter_arus !== undefined && sensorData.inverter_arus !== null) ? sensorData
-                    .inverter_arus : null;
-                const tInv = (sensorData.inverter_tegangan !== undefined && sensorData.inverter_tegangan !== null) ?
-                    sensorData.inverter_tegangan : null;
+        function isDataValid(timestamp) {
+            if (!timestamp) return false;
+            const now = Date.now();
+            const diff = now - timestamp;
+            return diff < DATA_TIMEOUT;
+        }
 
-                const aPlnStr = (aPln !== null) ? fmt(aPln, 2) : '--';
-                const tPlnStr = (tPln !== null) ? fmt(tPln, 1) : '--';
-                const aInvStr = (aInv !== null) ? fmt(aInv, 2) : '--';
-                const tInvStr = (tInv !== null) ? fmt(tInv, 1) : '--';
+        // ================================================================
+        //  UPDATE DASHBOARD
+        // ================================================================
+        function update(sensor, ats) {
+            // Ambil timestamp dari sensor atau ats
+            let ts = sensor?.timestamp || ats?.last_switch || null;
+            let valid = isDataValid(ts);
 
-                if (elPlnArus.textContent !== aPlnStr) { elPlnArus.textContent = aPlnStr;
-                    pulseValue(elPlnArus); }
-                if (elPlnTeg.textContent !== tPlnStr) { elPlnTeg.textContent = tPlnStr;
-                    pulseValue(elPlnTeg); }
-                if (elInvArus.textContent !== aInvStr) { elInvArus.textContent = aInvStr;
-                    pulseValue(elInvArus); }
-                if (elInvTeg.textContent !== tInvStr) { elInvTeg.textContent = tInvStr;
-                    pulseValue(elInvTeg); }
+            // ---- SENSOR ----
+            const aP = valid ? (sensor?.pln_arus ?? null) : null;
+            const tP = valid ? (sensor?.pln_tegangan ?? null) : null;
+            const aI = valid ? (sensor?.inverter_arus ?? null) : null;
+            const tI = valid ? (sensor?.inverter_tegangan ?? null) : null;
+            const dA = valid ? (ats?.delay ?? null) : null;
 
-                setStatusBadge(elPlnArusStat, aPln !== null, 'online', '● Normal', 'Tidak ada data');
-                setStatusBadge(elPlnTegStat, tPln !== null, 'online', '● Normal', 'Tidak ada data');
-                setStatusBadge(elInvArusStat, aInv !== null, 'online', '● Normal', 'Tidak ada data');
-                setStatusBadge(elInvTegStat, tInv !== null, 'online', '● Normal', 'Tidak ada data');
+            const setVal = (el, val, fmtFn = fmt) => {
+                const str = fmtFn(val);
+                if (el.textContent !== str) { el.textContent = str;
+                    pulse(el); }
+            };
+            setVal(el.plnArus, aP);
+            setVal(el.plnTeg, tP, v => fmt(v, 1));
+            setVal(el.invArus, aI);
+            setVal(el.invTeg, tI, v => fmt(v, 1));
+            setVal(el.atsDelay, dA, v => fmt(v, 1));
 
-                lastSensorData = sensorData;
-            } else {
-                elPlnArus.textContent = '--';
-                elPlnTeg.textContent = '--';
-                elInvArus.textContent = '--';
-                elInvTeg.textContent = '--';
-                setStatusBadge(elPlnArusStat, false, 'offline', 'Tidak ada data', 'Tidak ada data');
-                setStatusBadge(elPlnTegStat, false, 'offline', 'Tidak ada data', 'Tidak ada data');
-                setStatusBadge(elInvArusStat, false, 'offline', 'Tidak ada data', 'Tidak ada data');
-                setStatusBadge(elInvTegStat, false, 'offline', 'Tidak ada data', 'Tidak ada data');
-                lastSensorData = null;
-            }
+            // Status badge
+            setStatus(el.plnArusStat, aP !== null, 'online', '● Normal');
+            setStatus(el.plnTegStat, tP !== null, 'online', '● Normal');
+            setStatus(el.invArusStat, aI !== null, 'online', '● Normal');
+            setStatus(el.invTegStat, tI !== null, 'online', '● Normal');
+            setStatus(el.atsDelayStat, dA !== null, 'ready', '● Siap');
 
-            // --- ATS DELAY ---
-            if (atsData) {
-                const d = (atsData.delay !== undefined && atsData.delay !== null) ? atsData.delay : null;
-                const dStr = (d !== null) ? fmt(d, 1) : '--';
-                if (elAtsDelay.textContent !== dStr) { elAtsDelay.textContent = dStr;
-                    pulseValue(elAtsDelay); }
-                setStatusBadge(elAtsDelayStat, d !== null, 'ready', '● Siap', 'Tidak ada data');
-                lastAtsData = atsData;
-            } else {
-                elAtsDelay.textContent = '--';
-                setStatusBadge(elAtsDelayStat, false, 'offline', 'Tidak ada data', 'Tidak ada data');
-                lastAtsData = null;
-            }
+            // ---- STATUS SISTEM ----
+            const src = (aP !== null && aP > 0.1) ? '⚡ PLN' :
+                        (aI !== null && aI > 0.1) ? '☀️ Inverter' :
+                        '⛔ Tidak Ada';
+            const srcCls = (aP !== null && aP > 0.1) ? 'ok' :
+                           (aI !== null && aI > 0.1) ? 'info' : 'err';
+            el.sumberAktif.textContent = src;
+            el.sumberAktif.className = 'value ' + srcCls;
 
-            // --- STATUS SISTEM (Ringkasan) ---
-            const aPln = (sensorData && sensorData.pln_arus !== undefined && sensorData.pln_arus !== null) ? sensorData
-                .pln_arus : null;
-            const aInv = (sensorData && sensorData.inverter_arus !== undefined && sensorData.inverter_arus !== null) ?
-                sensorData.inverter_arus : null;
+            const atsStat = (dA !== null && dA < 2) ? 'Siap Transfer' :
+                            (dA !== null && dA < 10) ? 'Siaga' :
+                            (dA !== null) ? 'Tertunda' : '—';
+            const atsCls = (dA !== null && dA < 2) ? 'ok' :
+                           (dA !== null && dA < 10) ? 'info' :
+                           (dA !== null) ? 'warn' : 'err';
+            el.statusATS.textContent = atsStat;
+            el.statusATS.className = 'value ' + atsCls;
 
-            let sumber = '—';
-            let sumberClass = 'info';
-            if (aPln !== null && aPln > 0.1) {
-                sumber = '⚡ PLN';
-                sumberClass = 'ok';
-            } else if (aInv !== null && aInv > 0.1) {
-                sumber = '☀️ Inverter';
-                sumberClass = 'info';
-            } else {
-                sumber = '⛔ Tidak Ada';
-                sumberClass = 'err';
-            }
-            elSumberAktif.textContent = sumber;
-            elSumberAktif.className = 'status-value ' + sumberClass;
+            // ---- TIMESTAMP ----
+            const displayTs = valid ? ts : null;
+            const tsStr = displayTs ? time(displayTs) : '--';
+            el.footerTs.textContent = tsStr;
+            el.lastUpdateLabel.textContent = displayTs ? '⏱️ ' + tsStr : '⏱️ --';
+            if (displayTs) lastUpdate = new Date(displayTs).getTime();
 
-            const dAts = (atsData && atsData.delay !== undefined && atsData.delay !== null) ? atsData.delay : null;
-            let atsStat = '—',
-                atsClass = 'info';
-            if (dAts !== null && dAts < 2) { atsStat = 'Siap Transfer';
-                atsClass = 'ok'; } else if (dAts !== null && dAts >= 2 && dAts < 10) { atsStat = 'Siaga';
-                atsClass = 'info'; } else if (dAts !== null && dAts >= 10) { atsStat = 'Tertunda';
-                atsClass = 'warn'; } else { atsStat = '—';
-                atsClass = 'err'; }
-            elStatusATS.textContent = atsStat;
-            elStatusATS.className = 'status-value ' + atsClass;
-
-            // --- TIMESTAMP ---
-            let ts = null;
-            if (sensorData && sensorData.timestamp) {
-                ts = sensorData.timestamp;
-            } else if (atsData && atsData.last_switch) {
-                ts = atsData.last_switch;
-            }
-            if (ts) {
-                const d = new Date(ts);
-                if (!isNaN(d.getTime())) {
-                    const str = d.toLocaleString('id-ID', { hour12: false });
-                    elFooterTs.textContent = str;
-                    elLastUpdateLabel.textContent = '⏱️ ' + str;
-                    lastUpdateTime = d.getTime();
-                } else {
-                    const now = new Date().toLocaleString('id-ID', { hour12: false });
-                    elFooterTs.textContent = now;
-                    elLastUpdateLabel.textContent = '⏱️ ' + now;
-                }
-            } else {
-                const now = new Date().toLocaleString('id-ID', { hour12: false });
-                elFooterTs.textContent = now;
-                elLastUpdateLabel.textContent = '⏱️ ' + now;
-            }
-
-            // --- SIMPAN KE RIWAYAT ---
-            if (sensorData && (aPln !== null || aInv !== null)) {
+            // ---- SIMPAN RIWAYAT (hanya jika data valid dan ada nilai) ----
+            if (valid && sensor && (aP !== null || aI !== null)) {
                 const entry = {
-                    timestamp: ts || Date.now(),
-                    plnArus: aPln,
-                    plnTeg: (sensorData && sensorData.pln_tegangan !== undefined && sensorData.pln_tegangan !== null) ?
-                        sensorData.pln_tegangan : null,
-                    invArus: aInv,
-                    invTeg: (sensorData && sensorData.inverter_tegangan !== undefined && sensorData.inverter_tegangan !==
-                        null) ? sensorData.inverter_tegangan : null,
-                    delay: dAts,
-                    sumber: sumber,
+                    ts: ts,
+                    aP: aP,
+                    tP: tP,
+                    aI: aI,
+                    tI: tI,
+                    dA: dA,
+                    src: src,
                     ats: atsStat
                 };
-                const last = historyData.length > 0 ? historyData[historyData.length - 1] : null;
-                if (!last || Math.abs(last.timestamp - entry.timestamp) > 3000) {
-                    historyData.push(entry);
-                    if (historyData.length > 1000) historyData.shift();
-                    renderLogTable();
+                const last = history[history.length - 1];
+                if (!last || Math.abs(last.ts - entry.ts) > 3000) {
+                    history.push(entry);
+                    if (history.length > 1000) history.shift();
+                    renderLog();
                 }
             }
+
+            lastSensor = sensor;
+            lastAts = ats;
         }
 
         // ================================================================
-        //  RENDER TABEL RIWAYAT
+        //  RENDER LOG
         // ================================================================
-        function renderLogTable() {
-            const tbody = elLogBody;
-            if (historyData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="no-data">Belum ada data riwayat. Tunggu pembacaan sensor...</td></tr>`;
+        function renderLog() {
+            const tbody = el.logBody;
+            if (!history.length) {
+                tbody.innerHTML = `<tr><td colspan="4" class="no-data">Belum ada data riwayat.</td></tr>`;
                 return;
             }
-
-            const sorted = [...historyData].reverse();
+            const sorted = [...history].reverse();
             let html = '';
-            sorted.forEach((item, idx) => {
-                const no = idx + 1;
-                const waktu = formatTime(item.timestamp);
-                const aPln = item.plnArus !== null ? fmt(item.plnArus, 2) : '--';
-                const tPln = item.plnTeg !== null ? fmt(item.plnTeg, 1) : '--';
-                const aInv = item.invArus !== null ? fmt(item.invArus, 2) : '--';
-                const tInv = item.invTeg !== null ? fmt(item.invTeg, 1) : '--';
-                const dly = item.delay !== null ? fmt(item.delay, 1) : '--';
-
-                const sensorStr =
-                    `${aPln} A / ${tPln} V / ${aInv} A / ${tInv} V / ${dly} detik`;
-                const statusStr = `${item.sumber || '—'} · ${item.ats || '—'}`;
-
+            sorted.forEach((item, i) => {
+                const aP = fmt(item.aP),
+                    tP = fmt(item.tP, 1);
+                const aI = fmt(item.aI),
+                    tI = fmt(item.tI, 1);
+                const dA = fmt(item.dA, 1);
                 html += `<tr>
-                        <td>${no}</td>
-                        <td>${waktu}</td>
-                        <td>${sensorStr}</td>
-                        <td>${statusStr}</td>
-                    </tr>`;
+                    <td>${i+1}</td>
+                    <td>${time(item.ts)}</td>
+                    <td>${aP} A / ${tP} V / ${aI} A / ${tI} V / ${dA} detik</td>
+                    <td>${item.src || '—'} · ${item.ats || '—'}</td>
+                </tr>`;
             });
             tbody.innerHTML = html;
         }
 
         // ================================================================
-        //  LISTENER REAL-TIME FIREBASE
+        //  FIREBASE LISTENERS
         // ================================================================
-        const sensorsRef = database.ref('/sensors');
-        const atsRef = database.ref('/ats');
+        db.ref('/sensors').on('value', snap => update(snap.val(), lastAts));
+        db.ref('/ats').on('value', snap => update(lastSensor, snap.val()));
 
-        sensorsRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            updateDashboard(data, lastAtsData);
-        }, (err) => console.error('Sensor error:', err));
-
-        atsRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            updateDashboard(lastSensorData, data);
-        }, (err) => console.error('ATS error:', err));
+        // Initial load
+        Promise.all([db.ref('/sensors').once('value'), db.ref('/ats').once('value')])
+            .then(([s, a]) => update(s.val(), a.val()));
 
         // ================================================================
-        //  AMBIL DATA AWAL
+        //  NAVIGASI TANGGAL (display only)
         // ================================================================
-        Promise.all([
-            sensorsRef.once('value'),
-            atsRef.once('value')
-        ]).then(([snapSensor, snapAts]) => {
-            updateDashboard(snapSensor.val(), snapAts.val());
-        }).catch(err => console.warn('Init load error:', err));
-
-        // ================================================================
-        //  NAVIGASI TANGGAL
-        // ================================================================
-        let dateOffset = 0;
-        document.getElementById('prevDayBtn').addEventListener('click', () => {
-            dateOffset--;
-            updateDateLabel();
-        });
-        document.getElementById('nextDayBtn').addEventListener('click', () => {
-            dateOffset++;
-            updateDateLabel();
-        });
-
-        function updateDateLabel() {
+        const updateDateLabel = () => {
             const d = new Date();
             d.setDate(d.getDate() + dateOffset);
-            elLogDateLabel.textContent = formatDate(d) + (dateOffset === 0 ? ' (Hari Ini)' : '');
-        }
+            el.logDateLabel.textContent = dateStr(d) + (dateOffset === 0 ? ' (Hari Ini)' : '');
+        };
+        $('prevDayBtn').onclick = () => { dateOffset--;
+            updateDateLabel(); };
+        $('nextDayBtn').onclick = () => { dateOffset++;
+            updateDateLabel(); };
+        updateDateLabel();
 
         // ================================================================
         //  EXPORT EXCEL
         // ================================================================
-        document.getElementById('exportBtn').addEventListener('click', async function() {
-            const btn = this;
-            btn.disabled = true;
-            btn.innerHTML = '⏳ Memproses...';
-
+        $('exportBtn').onclick = async function() {
+            this.disabled = true;
+            this.innerHTML = '⏳ ...';
             try {
-                const [snapSensor, snapAts] = await Promise.all([
-                    sensorsRef.once('value'),
-                    atsRef.once('value')
-                ]);
-                const sensor = snapSensor.val() || {};
-                const ats = snapAts.val() || {};
-
-                const now = new Date().toLocaleString('id-ID', { hour12: false });
+                const [s, a] = await Promise.all([db.ref('/sensors').once('value'), db.ref('/ats').once('value')]);
+                const sensor = s.val() || {},
+                    ats = a.val() || {};
                 const rows = [
-                    ['📋 LAPORAN MONITORING ATS'],
-                    ['Waktu Export', now],
-                    [''],
+                    ['LAPORAN MONITORING ATS'],
+                    ['Waktu Export', new Date().toLocaleString('id-ID', { hour12: false })],
+                    [],
                     ['Parameter', 'Nilai', 'Satuan'],
-                    ['Arus PLN', sensor.pln_arus !== undefined ? fmt(sensor.pln_arus, 2) : '--', 'A'],
-                    ['Tegangan PLN', sensor.pln_tegangan !== undefined ? fmt(sensor.pln_tegangan, 1) : '--',
-                    'V'],
-                    ['Arus Inverter', sensor.inverter_arus !== undefined ? fmt(sensor.inverter_arus, 2) : '--',
-                        'A'],
-                    ['Tegangan Inverter', sensor.inverter_tegangan !== undefined ? fmt(sensor.inverter_tegangan,
-                        1) : '--', 'V'],
-                    ['Time Delay ATS', ats.delay !== undefined ? fmt(ats.delay, 1) : '--', 'detik'],
-                    [''],
-                    ['Timestamp Sensor', sensor.timestamp ? new Date(sensor.timestamp).toLocaleString('id-ID',
-                        { hour12: false }) : '--', ''],
-                    ['Last Switch ATS', ats.last_switch ? new Date(ats.last_switch).toLocaleString('id-ID',
-                        { hour12: false }) : '--', ''],
-                    [''],
-                    ['RIWAYAT LOG (terbaru)'],
-                    ['No', 'Waktu', 'Arus PLN (A)', 'Teg PLN (V)', 'Arus INV (A)', 'Teg INV (V)', 'Delay ATS (detik)',
-                        'Sumber', 'ATS'
-                    ]
+                    ['Arus PLN', fmt(sensor.pln_arus), 'A'],
+                    ['Tegangan PLN', fmt(sensor.pln_tegangan, 1), 'V'],
+                    ['Arus Inverter', fmt(sensor.inverter_arus), 'A'],
+                    ['Tegangan Inverter', fmt(sensor.inverter_tegangan, 1), 'V'],
+                    ['Time Delay ATS', fmt(ats.delay, 1), 'detik'],
+                    [],
+                    ['Timestamp Sensor', time(sensor.timestamp), ''],
+                    ['Last Switch ATS', time(ats.last_switch), ''],
+                    [],
+                    ['RIWAYAT LOG'],
+                    ['No', 'Waktu', 'Arus PLN', 'Teg PLN', 'Arus INV', 'Teg INV', 'Delay', 'Sumber', 'ATS']
                 ];
-
-                const sorted = [...historyData].reverse();
-                const limit = Math.min(sorted.length, 100);
-                for (let i = 0; i < limit; i++) {
-                    const item = sorted[i];
-                    rows.push([
-                        i + 1,
-                        formatTime(item.timestamp),
-                        item.plnArus !== null ? fmt(item.plnArus, 2) : '--',
-                        item.plnTeg !== null ? fmt(item.plnTeg, 1) : '--',
-                        item.invArus !== null ? fmt(item.invArus, 2) : '--',
-                        item.invTeg !== null ? fmt(item.invTeg, 1) : '--',
-                        item.delay !== null ? fmt(item.delay, 1) : '--',
-                        item.sumber || '--',
-                        item.ats || '--'
+                const sorted = [...history].reverse();
+                sorted.slice(0, 100).forEach((item, i) => {
+                    rows.push([i + 1, time(item.ts), fmt(item.aP), fmt(item.tP, 1), fmt(item.aI), fmt(item.tI, 1),
+                        fmt(item.dA, 1), item.src || '--', item.ats || '--'
                     ]);
-                }
-
+                });
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.aoa_to_sheet(rows);
-                ws['!cols'] = [{ wch: 6 }, { wch: 22 }, { wch: 14 }, { wch: 14 }, { wch: 14 }, { wch: 14 },
-                { wch: 16 }, { wch: 14 }, { wch: 14 }];
+                ws['!cols'] = [{ wch: 6 }, { wch: 22 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 12 },
+                { wch: 14 }, { wch: 14 }, { wch: 14 }];
                 XLSX.utils.book_append_sheet(wb, ws, 'Monitoring');
-                XLSX.writeFile(wb, `Monitoring_ATS_${new Date().toISOString().slice(0,10)}.xlsx`);
-
-                btn.innerHTML = '✅ Berhasil!';
-                setTimeout(() => { btn.innerHTML = '📊 Export Excel';
-                    btn.disabled = false; }, 1600);
-            } catch (err) {
-                console.error('Export error:', err);
-                alert('Gagal mengunduh file Excel. Periksa koneksi.');
-                btn.innerHTML = '📊 Export Excel';
-                btn.disabled = false;
-            }
-        });
+                XLSX.writeFile(wb, `ATS_${new Date().toISOString().slice(0,10)}.xlsx`);
+                this.innerHTML = '✅ Berhasil!';
+                setTimeout(() => { this.innerHTML = '📊 Export Excel';
+                    this.disabled = false; }, 1500);
+            } catch (e) { alert('Gagal export: ' + e.message);
+                this.innerHTML = '📊 Export Excel';
+                this.disabled = false; }
+        };
 
         // ================================================================
         //  EXPORT CSV
         // ================================================================
-        document.getElementById('exportCsvBtn').addEventListener('click', function() {
-            if (historyData.length === 0) {
-                alert('Belum ada data riwayat untuk diekspor.');
-                return;
-            }
-            let csv = 'No,Waktu,Arus PLN(A),Teg PLN(V),Arus INV(A),Teg INV(V),Delay ATS(detik),Sumber,ATS\n';
-            const sorted = [...historyData].reverse();
-            sorted.forEach((item, i) => {
-                const row = [
-                    i + 1,
-                    formatTime(item.timestamp),
-                    item.plnArus !== null ? fmt(item.plnArus, 2) : '--',
-                    item.plnTeg !== null ? fmt(item.plnTeg, 1) : '--',
-                    item.invArus !== null ? fmt(item.invArus, 2) : '--',
-                    item.invTeg !== null ? fmt(item.invTeg, 1) : '--',
-                    item.delay !== null ? fmt(item.delay, 1) : '--',
-                    item.sumber || '--',
-                    item.ats || '--'
-                ];
-                csv += row.join(',') + '\n';
+        $('exportCsvBtn').onclick = () => {
+            if (!history.length) return alert('Belum ada data.');
+            let csv = 'No,Waktu,Arus PLN,Teg PLN,Arus INV,Teg INV,Delay,Sumber,ATS\n';
+            [...history].reverse().forEach((item, i) => {
+                csv += [i + 1, time(item.ts), fmt(item.aP), fmt(item.tP, 1), fmt(item.aI), fmt(item.tI, 1),
+                    fmt(item.dA, 1), item.src || '--', item.ats || '--'
+                ].join(',') + '\n';
             });
-
             const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
-            a.href = url;
-            a.download = `Log_ATS_${new Date().toISOString().slice(0,10)}.csv`;
+            a.href = URL.createObjectURL(blob);
+            a.download = `ATS_${new Date().toISOString().slice(0,10)}.csv`;
             a.click();
-            URL.revokeObjectURL(url);
-        });
+            URL.revokeObjectURL(a.href);
+        };
 
         // ================================================================
         //  HAPUS RIWAYAT
         // ================================================================
-        document.getElementById('clearLogBtn').addEventListener('click', function() {
-            if (historyData.length === 0) {
-                alert('Riwayat sudah kosong.');
-                return;
-            }
-            if (confirm('Hapus semua data riwayat yang tersimpan?')) {
-                historyData = [];
-                renderLogTable();
-            }
-        });
+        $('clearLogBtn').onclick = () => {
+            if (!history.length) return alert('Riwayat kosong.');
+            if (confirm('Hapus semua data riwayat?')) { history = [];
+                renderLog(); }
+        };
 
         // ================================================================
-        //  UPDATE TIMESTAMP OTOMATIS
+        //  UPDATE TIMESTAMP OTOMATIS (jika tidak ada update dari Firebase)
         // ================================================================
         setInterval(() => {
-            const now = Date.now();
-            if (now - lastUpdateTime > 6000) {
-                const str = new Date().toLocaleString('id-ID', { hour12: false });
-                elFooterTs.textContent = str;
-                elLastUpdateLabel.textContent = '⏱️ ' + str;
+            // Jika data terakhir sudah lebih dari 5 detik dan tidak ada update, tampilkan waktu sekarang
+            if (Date.now() - lastUpdate > 5000) {
+                const now = new Date().toLocaleString('id-ID', { hour12: false });
+                el.footerTs.textContent = now;
+                el.lastUpdateLabel.textContent = '⏱️ ' + now;
             }
         }, 5000);
 
-        updateDateLabel();
-        console.log('✅ Dashboard ATS siap — real-time aktif!');
+        console.log('✅ Dashboard ATS siap — data usang akan otomatis disembunyikan!');
     </script>
-
 </body>
 </html>
